@@ -94,7 +94,7 @@ class TranslatedProblemForeignKeyQuerySet(QuerySet):
 
 class Problem(models.Model):
     code = models.CharField(max_length=20, verbose_name=_('problem code'), unique=True,
-                            validators=[RegexValidator('^[a-z0-9]+$', _('Problem code must be ^[a-z0-9]+$'))])
+                            validators=[RegexValidator('^[a-zA-Z0-9\-]+$', _('Problem code must be ^[a-z0-9]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('problem name'), db_index=True)
     description = models.TextField(verbose_name=_('problem body'))
     authors = models.ManyToManyField(Profile, verbose_name=_('creators'), blank=True, related_name='authored_problems')

@@ -602,7 +602,7 @@ msgstr "대회 코드"
 
 #: judge/models/contest.py:50
 msgid "Contest id must be ^[a-z0-9]+$"
-msgstr "대회 코드는 영어 소문자와 숫자만 가능합니다."
+msgstr "대회 코드는 영어 대소문자와 숫자, 하이픈(-)만 가능합니다."
 
 #: judge/models/contest.py:51
 msgid "contest name"
@@ -1080,7 +1080,7 @@ msgstr "문제 코드"
 
 #: judge/models/problem.py:97
 msgid "Problem code must be ^[a-z0-9]+$"
-msgstr "문제 코드는 영어 소문자와 숫자만 가능합니다."
+msgstr "문제 코드는 영어 대소문자와 숫자, 하이픈(-)만 가능합니다."
 
 #: judge/models/problem.py:98
 msgid "problem name"
