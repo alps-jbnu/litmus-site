@@ -49,9 +49,9 @@ def key_gen():
     import random
     now = timezone.now()
     yy = str(now.year)[2:]
-    mm = str(now.month)[:2]
-    dd = str(now.day)[:2]
-    code = "".join([chr(ord('A')+random.randint(0, 26)) for _ in range(2)])
+    mm = "{:02d}".format(now.month)
+    dd = "{:02d}".format(now.day)
+    code = "".join([chr(ord('A')+random.randint(0, 25)) for _ in range(2)])
     return "{}{}".format(yy+mm+dd, code)
 
 
