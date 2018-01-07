@@ -173,21 +173,21 @@ urlpatterns = [
         url(r'^/ajax$', contests.ContestTagDetailAjax.as_view(), name='contest_tag_ajax'),
     ])),
 
-    url(r'^contest/(?P<contest>\w+)', include([
+    url(r'^contest/(?P<contest>[\-\w]+)', include([
         url(r'^$', contests.ContestDetail.as_view(), name='contest_view'),
         url(r'^/ranking/$', contests.contest_ranking, name='contest_ranking'),
         url(r'^/ranking/ajax$', contests.contest_ranking_ajax, name='contest_ranking_ajax'),
         url(r'^/join$', contests.ContestJoin.as_view(), name='contest_join'),
         url(r'^/leave$', contests.ContestLeave.as_view(), name='contest_leave'),
 
-        url(r'^/rank/(?P<problem>\w+)/',
+        url(r'^/rank/(?P<problem>[\-\w]+)/',
             paged_list_view(ranked_submission.ContestRankedSubmission, 'contest_ranked_submissions')),
 
-        url(r'^/submissions/(?P<user>\w+)/(?P<problem>\w+)/',
+        url(r'^/submissions/(?P<user>[\-\w]+)/(?P<problem>\w+)/',
             paged_list_view(submission.UserContestSubmissions, 'contest_user_submissions')),
 
         url(r'^/participations$', contests.own_participation_list, name='contest_participation_own'),
-        url(r'^/participations/(?P<user>\w+)$', contests.participation_list, name='contest_participation'),
+        url(r'^/participations/(?P<user>[\-\w]+)$', contests.participation_list, name='contest_participation'),
 
         url(r'^/$', lambda _, contest: HttpResponsePermanentRedirect(reverse('contest_view', args=[contest]))),
     ])),
