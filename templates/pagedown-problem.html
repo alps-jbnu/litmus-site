@@ -1,7 +1,11 @@
 <div id="{{ id|safe }}-wmd-wrapper" class="wmd-wrapper">
     <div class="wmd-panel">
         <div id="{{ id|safe }}_wmd_button_bar"></div>
+        {% if body %}
         <textarea{{ attrs|safe }}>{{ body }}</textarea>
+        {% else %}
+        <textarea{{ attrs|safe }}>{% include 'problem_default_template.md' %}</textarea>
+        {% endif %}
     </div>
 
     {% if show_preview %}

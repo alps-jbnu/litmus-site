@@ -38,7 +38,7 @@ class ProblemForm(ModelForm):
             'group': Select2Widget,
         }
         if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['description'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('problem_preview'))
+            widgets['description'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('problem_preview'), template='pagedown-problem.html')
 
 
 class ProblemCreatorListFilter(admin.SimpleListFilter):
