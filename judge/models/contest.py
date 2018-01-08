@@ -46,19 +46,22 @@ class ContestTag(models.Model):
 
 
 def key_gen():
-    import random
+    import random, time
+
+    seed = long(time.time())
+    random.seed(seed)
+
     now = timezone.now()
     yy = str(now.year)[2:]
     mm = "{:02d}".format(now.month)
     dd = "{:02d}".format(now.day)
     code = "".join([chr(ord('A')+random.randint(0, 25)) for _ in range(2)])
-    return "{}{}".format(yy+mm+dd, code)
+    ret = "{}{}".format(yy+mm+dd, code)
+    return ret
 
 
 class Contest(models.Model):
-    random_key = key_gen()
-
-    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=random_key,
+    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=key_gen,
                            validators=[RegexValidator('^[a-zA-Z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('contest name'), db_index=True)
     organizers = models.ManyToManyField(Profile, help_text=_('These people will be able to edit the contest.'),
@@ -96,7 +99,7 @@ class Contest(models.Model):
     user_count = models.IntegerField(verbose_name=_('the amount of live participants'), default=0)
     summary = models.TextField(blank=True, verbose_name=_('contest summary'),
                                help_text=_('Plain-text, shown in meta description tag, e.g. for social media.'))
-    access_code = models.CharField(verbose_name=_('access code'), blank=True, default=random_key, max_length=255,
+    access_code = models.CharField(verbose_name=_('access code'), blank=True, default=key_gen, max_length=255,
                                    help_text=_('An optional code to prompt contestants before they are allowed '
                                                'to join the contest. Leave it blank to disable.'))
 
