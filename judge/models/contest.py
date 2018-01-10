@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from judge.models.problem import Problem
 from judge.models.profile import Profile, Organization
 from judge.models.submission import Submission
+from judge.utils.generator import make_key as key_gen
 
 __all__ = ['Contest', 'ContestTag', 'ContestParticipation', 'ContestProblem', 'ContestSubmission', 'Rating']
 
@@ -43,21 +44,6 @@ class ContestTag(models.Model):
     class Meta:
         verbose_name = _('contest tag')
         verbose_name_plural = _('contest tags')
-
-
-def key_gen():
-    import random, time
-
-    seed = long(time.time())
-    random.seed(seed)
-
-    now = timezone.now()
-    yy = str(now.year)[2:]
-    mm = "{:02d}".format(now.month)
-    dd = "{:02d}".format(now.day)
-    code = "".join([chr(ord('A')+random.randint(0, 25)) for _ in range(2)])
-    ret = "{}{}".format(yy+mm+dd, code)
-    return ret
 
 
 class Contest(models.Model):
