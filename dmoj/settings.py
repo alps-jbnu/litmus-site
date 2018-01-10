@@ -323,7 +323,7 @@ EVENT_DAEMON_KEY = None
 
 # Whatever you do, this better be one of the entries in `LANGUAGES`.
 LANGUAGE_CODE = 'ko'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 DEFAULT_USER_TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_L10N = True
