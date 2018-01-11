@@ -751,7 +751,7 @@ msgstr ""
 
 #: judge/models/contest.py:144
 msgid "Contest access codes"
-msgstr ""
+msgstr "대회 접근 코드"
 
 #: judge/models/contest.py:146 judge/models/contest.py:234
 #: judge/models/contest.py:269
@@ -769,11 +769,11 @@ msgstr ""
 #: judge/models/contest.py:152 judge/models/contest.py:268
 #: judge/models/profile.py:173
 msgid "user"
-msgstr ""
+msgstr "유저"
 
 #: judge/models/contest.py:154
 msgid "score"
-msgstr ""
+msgstr "점수"
 
 #: judge/models/contest.py:155
 msgid "cumulative time"
@@ -781,7 +781,7 @@ msgstr ""
 
 #: judge/models/contest.py:156
 msgid "virtual participation id"
-msgstr ""
+msgstr "가상 참가자 id"
 
 #: judge/models/contest.py:157
 msgid "0 means non-virtual, otherwise the n-th virtual participation"
@@ -804,17 +804,17 @@ msgstr ""
 
 #: judge/models/contest.py:226
 msgid "contest participation"
-msgstr ""
+msgstr "대회 참가자"
 
 #: judge/models/contest.py:227
 msgid "contest participations"
-msgstr ""
+msgstr "대회 참가자들"
 
 #: judge/models/contest.py:233 judge/models/contest.py:253
 #: judge/models/problem.py:303 judge/models/problem.py:308
 #: judge/models/problem.py:326 judge/models/problem_data.py:34
 msgid "problem"
-msgstr ""
+msgstr "문제"
 
 #: judge/models/contest.py:235 judge/models/contest.py:257
 #: judge/models/problem.py:112
@@ -839,7 +839,7 @@ msgstr ""
 
 #: judge/models/contest.py:240
 msgid "Maximum number of submissions for this problem, or 0 for no limit."
-msgstr ""
+msgstr "이 문제는 최대 제출 횟수가 제한됩니다. 0은 제한이 없음을 의미합니다."
 
 #: judge/models/contest.py:242
 msgid "Why include a problem you can't submit to?"
@@ -859,11 +859,11 @@ msgstr "제출"
 
 #: judge/models/contest.py:255 judge/models/contest.py:270
 msgid "participation"
-msgstr ""
+msgstr "참가"
 
 #: judge/models/contest.py:259
 msgid "Whether this submission was ran only on pretests."
-msgstr ""
+msgstr "제출들을 pretest만 실행할 것인지 여부를 결정합니다."
 
 #: judge/models/contest.py:263
 msgid "contest submission"
@@ -927,15 +927,15 @@ msgstr ""
 
 #: judge/models/interface.py:48
 msgid "parent item"
-msgstr ""
+msgstr "상위 항목"
 
 #: judge/models/interface.py:65
 msgid "post title"
-msgstr ""
+msgstr "게시글 제목"
 
 #: judge/models/interface.py:66 judge/models/problem.py:342
 msgid "authors"
-msgstr ""
+msgstr "작성한 사람"
 
 #: judge/models/interface.py:67
 msgid "slug"
@@ -955,11 +955,11 @@ msgstr ""
 
 #: judge/models/interface.py:71
 msgid "post content"
-msgstr ""
+msgstr "게시글 내용"
 
 #: judge/models/interface.py:72
 msgid "post summary"
-msgstr ""
+msgstr "게시글 요약"
 
 #: judge/models/interface.py:73
 msgid "openGraph image"
@@ -967,15 +967,15 @@ msgstr ""
 
 #: judge/models/interface.py:90
 msgid "Edit all posts"
-msgstr ""
+msgstr "모든 게시글을 수정"
 
 #: judge/models/interface.py:92
 msgid "blog post"
-msgstr ""
+msgstr "블로그 포스트"
 
 #: judge/models/interface.py:93
 msgid "blog posts"
-msgstr ""
+msgstr "블로그 포스트들"
 
 #: judge/models/message.py:10
 msgid "message title"
@@ -2693,7 +2693,7 @@ msgstr "사용자들"
 
 #: templates/contest/contest.html:99
 msgid "Editorial"
-msgstr ""
+msgstr "에디토리얼"
 
 #: templates/contest/list.html:27 templates/contest/media-js.html:9
 msgid "Are you sure you want to join?"
@@ -2704,6 +2704,8 @@ msgid ""
 "Joining a contest for the first time starts your timer, after which it "
 "becomes unstoppable."
 msgstr ""
+"입장하는 순간부터 대회에 참가되며 기록에 남습니다. 또한, "
+"입장과 무관하게 대회 시간은 계속 흘러갑니다."
 
 #: templates/contest/list.html:93
 msgid "Ongoing Contests"
