@@ -149,13 +149,13 @@
     </div>
     <div class="problem-info-entry">
         <i class="fa fa-clock-o fa-fw"></i><span class="pi-name">{{ _('Time limit:') }}</span>
-        <span class="pi-value">{{ problem.time_limit }}s</span>
+        <span class="pi-value">{{ problem.time_limit }}초</span>
     </div>
     <div class="problem-lang-limits">
         {% for name, limit in problem.language_time_limit %}
             <div class="lang-limit">
                 <span class="lang-name">{{ name }}</span>
-                <span class="lang-tl">{{ limit }}s</span>
+                <span class="lang-tl">{{ limit }}초</span>
             </div>
         {% endfor %}
     </div>
