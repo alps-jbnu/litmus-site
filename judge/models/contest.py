@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from judge.models.problem import Problem
 from judge.models.profile import Profile, Organization
 from judge.models.submission import Submission
-from judge.utils.generator import make_key as key_gen
+import judge.utils.generator as gen
 
 __all__ = ['Contest', 'ContestTag', 'ContestParticipation', 'ContestProblem', 'ContestSubmission', 'Rating']
 
@@ -47,7 +47,7 @@ class ContestTag(models.Model):
 
 
 class Contest(models.Model):
-    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=key_gen,
+    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=gen.make_key,
                            validators=[RegexValidator('^[a-zA-Z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('contest name'), db_index=True)
     organizers = models.ManyToManyField(Profile, help_text=_('These people will be able to edit the contest.'),
@@ -85,7 +85,7 @@ class Contest(models.Model):
     user_count = models.IntegerField(verbose_name=_('the amount of live participants'), default=0)
     summary = models.TextField(blank=True, verbose_name=_('contest summary'),
                                help_text=_('Plain-text, shown in meta description tag, e.g. for social media.'))
-    access_code = models.CharField(verbose_name=_('access code'), blank=True, default=key_gen, max_length=255,
+    access_code = models.CharField(verbose_name=_('access code'), blank=True, default=gen.make_random_fruit, max_length=255,
                                    help_text=_('An optional code to prompt contestants before they are allowed '
                                                'to join the contest. Leave it blank to disable.'))
 
