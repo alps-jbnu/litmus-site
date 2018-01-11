@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: dmoj\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-29 03:11+0000\n"
-"PO-Revision-Date: 2018-01-10 22:52-0000\n"
+"PO-Revision-Date: 2018-01-11 23:45-0000\n"
 "Last-Translator: Joona Yoon <joonas.yoon@gmail.com>\n"
 "Language-Team: Korean\n"
 "Language: ko_KR\n"
@@ -308,7 +308,7 @@ msgstr ""
 #: judge/admin/submission.py:21 judge/admin/submission.py:40
 #: judge/admin/submission.py:208
 msgid "None"
-msgstr ""
+msgstr "없음"
 
 #: judge/admin/submission.py:21
 msgid "Not done"
@@ -339,7 +339,7 @@ msgstr "재채점 권한이 없습니다. (+too many)"
 #: judge/admin/submission.py:142
 #, python-format
 msgid "%d submission were successfully scheduled for rejudging."
-msgid_plural "%d submissions were successfully scheduled for rejudging."
+msgid_plural "%d 개의 제출들을 재채점하기 시작했습니다."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -513,15 +513,15 @@ msgstr ""
 
 #: judge/models/comment.py:36
 msgid "commenter"
-msgstr ""
+msgstr "작성자"
 
 #: judge/models/comment.py:37
 msgid "posted time"
-msgstr ""
+msgstr "작성시간"
 
 #: judge/models/comment.py:38
 msgid "associated Page"
-msgstr ""
+msgstr "관련 페이지"
 
 #: judge/models/comment.py:40
 msgid "Page code must be ^[pc]:[a-z0-9]+$|^b:\\d+$"
@@ -529,52 +529,52 @@ msgstr ""
 
 #: judge/models/comment.py:41
 msgid "votes"
-msgstr "votes"
+msgstr ""
 
 #: judge/models/comment.py:42
 msgid "title of comment"
-msgstr ""
+msgstr "댓글 제목"
 
 #: judge/models/comment.py:43
 msgid "body of comment"
-msgstr ""
+msgstr "댓글 내용"
 
 #: judge/models/comment.py:44
 msgid "hide the comment"
-msgstr ""
+msgstr "댓글 가리기"
 
 #: judge/models/comment.py:45
 msgid "parent"
-msgstr ""
+msgstr "부모"
 
 #: judge/models/comment.py:49
 msgid "comment"
-msgstr ""
+msgstr "댓글"
 
 #: judge/models/comment.py:50
 msgid "comments"
-msgstr ""
+msgstr "댓글들"
 
 #: judge/models/comment.py:115 judge/models/problem.py:353
 #, python-format
 msgid "Editorial for %s"
-msgstr ""
+msgstr "%s의 에디토리얼"
 
 #: judge/models/comment.py:146
 msgid "comment vote"
-msgstr ""
+msgstr "댓글 투표"
 
 #: judge/models/comment.py:147
 msgid "comment votes"
-msgstr ""
+msgstr "댓글 투표들"
 
 #: judge/models/contest.py:20
 msgid "Invalid colour."
-msgstr ""
+msgstr "잘못된 색상"
 
 #: judge/models/contest.py:22
 msgid "tag name"
-msgstr ""
+msgstr "태그 이름"
 
 #: judge/models/contest.py:23
 msgid "Lowercase letters and hyphens only."
@@ -582,19 +582,19 @@ msgstr "소문자와 하이픈(-)만 가능합니다."
 
 #: judge/models/contest.py:24
 msgid "tag colour"
-msgstr ""
+msgstr "태그 색깔"
 
 #: judge/models/contest.py:25
 msgid "tag description"
-msgstr ""
+msgstr "태그 설명"
 
 #: judge/models/contest.py:44
 msgid "contest tag"
-msgstr ""
+msgstr "대회 태그"
 
 #: judge/models/contest.py:45 judge/models/contest.py:83
 msgid "contest tags"
-msgstr ""
+msgstr "대회 태그(들)"
 
 #: judge/models/contest.py:49
 msgid "contest id"
@@ -636,7 +636,7 @@ msgstr "시간 제한"
 
 #: judge/models/contest.py:59 judge/models/problem.py:115
 msgid "publicly visible"
-msgstr ""
+msgstr "공개적으로 보이기"
 
 #: judge/models/contest.py:60
 msgid ""
@@ -656,7 +656,7 @@ msgstr ""
 
 #: judge/models/contest.py:65
 msgid "no comments"
-msgstr ""
+msgstr "댓글 금지"
 
 #: judge/models/contest.py:66
 msgid "Use clarification system instead of comments."
@@ -717,7 +717,7 @@ msgstr "실시간 참가자 수"
 
 #: judge/models/contest.py:85
 msgid "contest summary"
-msgstr ""
+msgstr "대회 요약"
 
 #: judge/models/contest.py:86 judge/models/problem.py:125
 msgid "Plain-text, shown in meta description tag, e.g. for social media."
@@ -732,6 +732,8 @@ msgid ""
 "An optional code to prompt contestants before they are allowed to join the "
 "contest. Leave it blank to disable."
 msgstr ""
+"(선택) 대회에 참가하기 위해서는 이 접근 코드를 입력해야 합니다. "
+"<b>사용하고 싶지 않다면 빈칸으로 만들어주세요.</b>"
 
 #: judge/models/contest.py:140
 msgid "See private contests"
@@ -819,7 +821,7 @@ msgstr "문제"
 #: judge/models/contest.py:235 judge/models/contest.py:257
 #: judge/models/problem.py:112
 msgid "points"
-msgstr "점"
+msgstr "점수"
 
 #: judge/models/contest.py:236
 msgid "partial"
@@ -1221,7 +1223,7 @@ msgstr ""
 
 #: judge/models/problem.py:333
 msgid "language-specific resource limit"
-msgstr ""
+msgstr "특정 언어의 제약 사항"
 
 #: judge/models/problem.py:334
 msgid "language-specific resource limits"
@@ -1591,15 +1593,15 @@ msgstr ""
 
 #: judge/models/runtime.py:41
 msgid "extension"
-msgstr ""
+msgstr "확장자"
 
 #: judge/models/runtime.py:42
 msgid "The extension of source files, e.g., \"py\" or \"cpp\"."
-msgstr ""
+msgstr "소스 파일의 확장자명입니다. (예를 들면, \"py\", \"cpp\" 등)"
 
 #: judge/models/runtime.py:97
 msgid "languages"
-msgstr ""
+msgstr "언어들"
 
 #: judge/models/runtime.py:101
 msgid "language to which this runtime belongs"
@@ -1659,7 +1661,7 @@ msgstr ""
 
 #: judge/models/runtime.py:121 judge/models/runtime.py:156
 msgid "judges"
-msgstr "저지(들)"
+msgstr "저지들"
 
 #: judge/models/runtime.py:155
 msgid "judge"
@@ -1809,7 +1811,7 @@ msgstr "테스트케이스 ID"
 
 #: judge/models/submission.py:158
 msgid "status flag"
-msgstr ""
+msgstr "상태 구분"
 
 #: judge/models/submission.py:162
 msgid "points possible"
