@@ -173,7 +173,7 @@ urlpatterns = [
         url(r'^/ajax$', contests.ContestTagDetailAjax.as_view(), name='contest_tag_ajax'),
     ])),
 
-    url(r'^contest/(?P<contest>[-\w]+)', include([
+    url(r'^contest/(?P<contest>\w+)', include([
         url(r'^$', contests.ContestDetail.as_view(), name='contest_view'),
         url(r'^/ranking/$', contests.contest_ranking, name='contest_ranking'),
         url(r'^/ranking/ajax$', contests.contest_ranking_ajax, name='contest_ranking_ajax'),
