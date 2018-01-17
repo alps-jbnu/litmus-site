@@ -83,8 +83,8 @@ class ProblemSubmitForm(ModelForm):
 class EditOrganizationForm(ModelForm):
     class Meta:
         model = Organization
-        fields = ['about', 'admins']
-        widgets = {'admins': Select2MultipleWidget()}
+        fields = ['name', 'key', 'about']
+        widgets = {}
         if HeavyPreviewPageDownWidget is not None:
             widgets['about'] = HeavyPreviewPageDownWidget(preview=reverse_lazy('organization_preview'))
 
