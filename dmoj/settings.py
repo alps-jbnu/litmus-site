@@ -331,6 +331,8 @@ USE_TZ = True
 
 # Cookies
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 60 * 60 # in seconds
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
