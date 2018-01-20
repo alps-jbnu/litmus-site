@@ -30,12 +30,10 @@ class ProfileForm(ModelForm):
         fields = ['name', 'student_id', 'about', 'organizations', 'timezone', 'language', 'ace_theme']
         widgets = {
             'name': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
-            'user_script': AceWidget(theme='github'),
             'student_id': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
             'timezone': Select2Widget(attrs={'style': 'width:200px'}),
             'language': Select2Widget(attrs={'style': 'width:200px'}),
-            'ace_theme': Select2Widget(attrs={'style': 'width:200px'}),
-            'math_engine': Select2Widget(attrs={'style': 'width:200px'})
+            'ace_theme': Select2Widget(attrs={'style': 'width:200px'})
         }
 
         if HeavyPreviewPageDownWidget is not None:

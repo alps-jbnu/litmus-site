@@ -117,12 +117,6 @@
                                 <td><label class="inline-header grayed">{{ _('Editor theme') }}:</label></td>
                                 <td><span class="fullwidth">{{ form.ace_theme }}</span></td>
                             </tr>
-                            {# % if has_math_config % #}
-                                <tr>
-                                    <td><label class="inline-header grayed">{{ _('Math engine') }}:</label></td>
-                                    <td><span class="fullwidth">{{ form.math_engine }}</span></td>
-                                </tr>
-                            {# % endif % #}
                             {% if form.newsletter %}
                                 <tr>
                                     <td colspan="2">
@@ -143,12 +137,6 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="http://www.gravatar.com/" title="{{ _('Change your avatar') }}"
-                                       target="_blank" class="inline-header">{{ _('Change your avatar') }}</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
                                     <a href="{{ url('password_change') }}" class="inline-header">
                                         {{ _('Change your password') }}
                                     </a>
@@ -165,9 +153,6 @@
                 </tr>
             </table>
 
-            <hr>
-            <div class="block-header">{{ _('User-script') }}:</div>
-            {{ form.user_script }}
             <hr>
 
             <input type="submit" style="float:right" value="{{ _('Update profile') }}">
