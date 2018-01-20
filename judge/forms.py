@@ -27,10 +27,11 @@ class ProfileForm(ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['name', 'about', 'organizations', 'timezone', 'language', 'ace_theme', 'user_script', 'math_engine']
+        fields = ['name', 'student_id', 'about', 'organizations', 'timezone', 'language', 'ace_theme']
         widgets = {
             'name': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
             'user_script': AceWidget(theme='github'),
+            'student_id': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
             'timezone': Select2Widget(attrs={'style': 'width:200px'}),
             'language': Select2Widget(attrs={'style': 'width:200px'}),
             'ace_theme': Select2Widget(attrs={'style': 'width:200px'}),
