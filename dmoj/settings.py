@@ -153,6 +153,7 @@ MIDDLEWARE = (
     'judge.user_log.LogUserAccessMiddleware',
     'judge.timezone.TimezoneMiddleware',
     'judge.middleware.ContestMiddleware',
+    'judge.middleware.UserActivateMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'judge.social_auth.SocialAuthExceptionMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
