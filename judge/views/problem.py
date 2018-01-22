@@ -620,6 +620,8 @@ def clone_problem(request, problem):
     problem.pk = None
     problem.is_public = False
     problem.code += '_clone'
+    problem.user_count = 0
+    problem.ac_rate = 0.0
     try:
         problem.save()
     except IntegrityError:
