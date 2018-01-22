@@ -25,10 +25,24 @@ class UserActivateMiddleware(object):
         if request.user.is_authenticated:
             profile = request.user.profile
             current_path = request.path
-            activate_path = reverse('user_page')
-            # print(profile.student_id)
-            if not profile.student_id and current_path != activate_path:
-                return redirect(reverse('user_page'))
+            activate_path = reverse('user_activate_profile')
+
+            feel_free_on = [
+                activate_path,
+                '/admin',
+                reverse('auth_logout')
+            ]
+
+            def is_available(path):
+                for ok in feel_free_on:
+                    if path.startswith(ok):
+                        return True
+                return False
+
+            need_to_activate = not profile.student_id or not profile.name
+
+            if need_to_activate and not is_available(current_path):
+                return redirect(activate_path)
         else:
             pass
         return self.get_response(request)
