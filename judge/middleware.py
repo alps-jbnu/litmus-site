@@ -30,7 +30,7 @@ class UserActivateMiddleware(object):
             feel_free_on = [
                 activate_path,
                 '/admin',
-                reverse('auth_logout')
+                '/accounts'
             ]
 
             def is_available(path):
