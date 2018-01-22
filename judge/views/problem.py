@@ -619,7 +619,8 @@ def clone_problem(request, problem):
     types = problem.types.all()
     problem.pk = None
     problem.is_public = False
-    problem.code += '_clone'
+    problem.code += '-clone'
+    problem.name += ' (clone)'
     problem.user_count = 0
     problem.ac_rate = 0.0
     try:
