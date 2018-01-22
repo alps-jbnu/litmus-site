@@ -142,6 +142,7 @@ urlpatterns = [
     ])),
 
     url(r'^user$', user.UserAboutPage.as_view(), name='user_page'),
+    url(r'^edit/profile/activate/$', user.activate_profile, name='user_activate_profile'),
     url(r'^edit/profile/$', user.edit_profile, name='user_edit_profile'),
     url(r'^user/(?P<user>\w+)', include([
         url(r'^$', user.UserAboutPage.as_view(), name='user_page'),

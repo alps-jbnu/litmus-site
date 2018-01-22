@@ -63,6 +63,26 @@ class ProfileForm(ModelForm):
         return fix_unicode(self.cleaned_data['name'] or '')
 
 
+class ProfileActivateForm(ModelForm):
+    
+    class Meta:
+        model = Profile
+        fields = ['name', 'student_id']
+        widgets = {
+            'name': TextInput(attrs={'style': 'width:100%;box-sizing:border-box', 'required': 'true'}),
+            'student_id': TextInput(attrs={'style': 'width:100%;box-sizing:border-box', 'required': 'true'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(ProfileActivateForm, self).__init__(*args, **kwargs)
+
+
+    def clean_name(self):
+        return fix_unicode(self.cleaned_data['name'] or '')
+
+
+
 class ProblemSubmitForm(ModelForm):
     source = CharField(max_length=65536, widget=AceWidget(theme='twilight', no_ace_media=True))
 

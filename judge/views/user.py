@@ -25,7 +25,7 @@ from django.utils.translation import ugettext as _, ugettext_lazy
 from django.views.generic import DetailView, ListView, TemplateView
 from reversion import revisions
 
-from judge.forms import ProfileForm, newsletter_id
+from judge.forms import ProfileForm, ProfileActivateForm, newsletter_id
 from judge.models import Profile, Submission, Rating
 from judge.performance_points import get_pp_breakdown, PP_ENTRIES
 from judge.ratings import rating_class, rating_progress
@@ -248,6 +248,28 @@ def edit_profile(request):
         'has_math_config': bool(getattr(settings, 'MATHOID_URL', False)),
         'TIMEZONE_MAP': tzmap or 'http://momentjs.com/static/img/world.png',
         'TIMEZONE_BG': getattr(settings, 'TIMEZONE_BG', None if tzmap else '#4E7CAD'),
+    })
+
+
+@login_required
+def activate_profile(request):
+    profile = Profile.objects.get(user=request.user)
+    if profile.mute:
+        raise Http404()
+    if request.method == 'POST':
+        form = ProfileActivateForm(request.POST, instance=profile, user=request.user)
+        if form.is_valid():
+            with transaction.atomic(), revisions.create_revision():
+                form.save()
+                revisions.set_user(request.user)
+                revisions.set_comment(_('Updated on site'))
+
+            return HttpResponseRedirect(reverse('user_page'))
+    else:
+        form = ProfileActivateForm(instance=profile, user=request.user)
+
+    return render(request, 'user/activate-profile.html', {
+        'form': form, 'title': _('Congratulations!')
     })
 
 

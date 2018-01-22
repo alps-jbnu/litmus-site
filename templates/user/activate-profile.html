@@ -1,0 +1,95 @@
+{% extends "user/user-base.html" %}
+
+{% block user_media %}
+    {{ form.media.css }}
+    <style>
+        .sortedm2m-container, .sortedm2m-container p.selector-filter {
+            width: 300px;
+        }
+
+        .sortedm2m-container p.selector-filter input {
+            width: 262px;
+        }
+
+        ul.sortedm2m {
+            width: 284px;
+            min-height: 70px;
+            max-height: 200px;
+            height: 70px
+        }
+
+        .grayed {
+            color: #666;
+        }
+
+        .inline-header {
+            float: left;
+            font-size: 1.1em;
+            padding: 4px 8px;
+            padding-left: 0;
+        }
+
+        .block-header {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .fullwidth {
+            display: block;
+            overflow: hidden;
+        }
+
+        #edit-form {
+            border: unset;
+            background: unset;
+            max-width: 700px;
+        }
+
+        #center-float {
+            position: relative;
+            margin: 0 auto auto -28.5em;
+            left: 50%;
+            width: 700px;
+        }
+    </style>
+{% endblock %}
+
+{% block js_media %}
+    {{ form.media.js }}
+{% endblock %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'edit' %}
+    {% set user = request.user.profile %}
+{% endblock %}
+
+{% block body %}
+    <div id="center-float">
+        <form id="edit-form" action="" method="post" class="form-area">
+            {% if form.errors %}
+                <div class="alert alert-danger alert-dismissable">
+                    <a href="#" class="close">x</a>
+                    {{ form.non_field_errors() }}
+                </div>
+            {% endif %}
+
+            {% csrf_token %}
+
+            <div style="padding-top:0.5em">
+                <label class="inline-header grayed">{{ _('Display name') }}:</label>
+                <span class="fullwidth">{{ form.name }}</span>
+            </div>
+
+            <div style="padding-top:0.5em">
+                <label class="inline-header grayed">{{ _('Student ID') }}:</label>
+                <span class="fullwidth">{{ form.student_id }}</span>
+            </div>
+
+            <hr>
+
+            <input type="submit" style="float:right" value="{{ _('Update profile') }}">
+        </form>
+    </div>
+{% endblock %}
