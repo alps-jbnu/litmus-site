@@ -87,7 +87,6 @@ class ContestForm(ModelForm):
         if HeavyPreviewAdminPageDownWidget is not None:
             widgets['description'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('contest_preview'))
 
-
 class ContestAdmin(VersionAdmin):
     fieldsets = (
         (None, {'fields': ('key', 'name', 'organizers', 'is_public', 'use_clarifications',
@@ -174,14 +173,15 @@ class ContestAdmin(VersionAdmin):
                 rate_contest(contest)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('admin:judge_contest_changelist')))
 
-    def get_form(self, *args, **kwargs):
-        form = super(ContestAdmin, self).get_form(*args, **kwargs)
+    def get_form(self, request, *args, **kwargs):
+        form = super(ContestAdmin, self).get_form(request, *args, **kwargs)
         perms = ('edit_own_contest', 'edit_all_contest')
         form.base_fields['organizers'].queryset = Profile.objects.filter(
             Q(user__is_superuser=True) |
             Q(user__groups__permissions__codename__in=perms) |
             Q(user__user_permissions__codename__in=perms)
         ).distinct()
+        form.base_fields['organizers'].initial = request.user
         return form
 
 
