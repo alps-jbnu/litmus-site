@@ -46,6 +46,14 @@ class ContestTag(models.Model):
         verbose_name_plural = _('contest tags')
 
 
+def today():
+    return timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+
+def days_hence(days=7):
+    date = today() + timezone.timedelta(days=days)
+    return timezone.localtime(date.replace(hour=23, minute=59, second=59))
+
+
 class Contest(models.Model):
     key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=gen.make_key,
                            validators=[RegexValidator('^[a-zA-Z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
@@ -54,8 +62,8 @@ class Contest(models.Model):
                                         related_name='organizers+')
     description = models.TextField(verbose_name=_('description'), blank=True)
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
-    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
-    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
+    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True, default=today)
+    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True, default=days_hence)
     time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True,
                                       help_text=_('User must solve problems within the time given. '
                                                   'Leave it blank to disable.'))
