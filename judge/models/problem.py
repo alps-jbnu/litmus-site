@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, QuerySet
 from django.db.models.expressions import RawSQL
@@ -109,7 +109,8 @@ class Problem(models.Model):
     time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_('The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'), default=1.0)
     memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'), default=131072)
     short_circuit = models.BooleanField(default=False)
-    points = models.FloatField(verbose_name=_('points'))
+    points = models.FloatField(verbose_name=_('points'), default=10.0,
+                               validators=[MinValueValidator(1.0), MaxValueValidator(20.0)])
     partial = models.BooleanField(verbose_name=_('allows partial points'), default=False)
     allowed_languages = models.ManyToManyField(Language, verbose_name=_('allowed languages'))
     is_public = models.BooleanField(verbose_name=_('publicly visible'), db_index=True, default=False)
