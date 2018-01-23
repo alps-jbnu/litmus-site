@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django.utils.translation import ugettext, ugettext_lazy as _
 from reversion.admin import VersionAdmin
 
-from judge.models import Organization
+from judge.models import Organization, Profile
 from judge.widgets import HeavySelect2MultipleWidget, HeavySelect2Widget, HeavyPreviewAdminPageDownWidget
 
 
@@ -52,6 +52,12 @@ class OrganizationAdmin(VersionAdmin):
         if request.user.has_perm('judge.edit_all_organization') or obj is None:
             return True
         return obj.admins.filter(id=request.user.profile.id).exists()
+
+    def get_form(self, request, *args, **kwargs):
+        form = super(OrganizationAdmin, self).get_form(request, *args, **kwargs)
+        form.base_fields['registrant'].initial = request.user
+        form.base_fields['admins'].initial = request.user
+        return form
 
 
 class OrganizationRequestAdmin(admin.ModelAdmin):
