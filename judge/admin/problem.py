@@ -241,9 +241,10 @@ class ProblemAdmin(VersionAdmin):
             kwargs['widget'] = CheckboxSelectMultipleWithSelectAll()
         return super(ProblemAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
-    def get_form(self, *args, **kwargs):
-        form = super(ProblemAdmin, self).get_form(*args, **kwargs)
+    def get_form(self, request, *args, **kwargs):
+        form = super(ProblemAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['authors'].queryset = Profile.objects.all()
+        form.base_fields['authors'].initial = request.user
         return form
 
     def save_model(self, request, obj, form, change):
