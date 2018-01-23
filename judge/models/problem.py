@@ -110,6 +110,7 @@ class Problem(models.Model):
     memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'), default=131072)
     short_circuit = models.BooleanField(default=False)
     points = models.FloatField(verbose_name=_('points'), default=10.0,
+                               help_text=_('Problem points should be between 1.0 and 20.0'),
                                validators=[MinValueValidator(1.0), MaxValueValidator(20.0)])
     partial = models.BooleanField(verbose_name=_('allows partial points'), default=False)
     allowed_languages = models.ManyToManyField(Language, verbose_name=_('allowed languages'))
