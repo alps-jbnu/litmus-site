@@ -56,7 +56,9 @@ class Contest(models.Model):
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
     start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
     end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
-    time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True)
+    time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True,
+                                      help_text=_('User must solve problems within the time given. '
+                                                  'Leave it blank to disable.'))
     is_public = models.BooleanField(verbose_name=_('publicly visible'), default=False,
                                     help_text=_('Should be set even for organization-private contests, where it '
                                                 'determines whether the contest is visible to members of the '
