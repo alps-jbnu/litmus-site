@@ -65,7 +65,7 @@ class ContestProblemInline(admin.TabularInline):
     model = ContestProblem
     verbose_name = _('Problem')
     verbose_name_plural = 'Problems'
-    fields = ('problem', 'points', 'partial', 'is_pretested', 'max_submissions', 'output_prefix_override', 'order')
+    fields = ('problem', 'points', 'partial', 'is_pretested', 'max_submissions', 'order')
     form = ContestProblemInlineForm
 
 
@@ -92,7 +92,7 @@ class ContestAdmin(VersionAdmin):
                            'hide_problem_tags', 'run_pretests_only')}),
         (_('Scheduling'), {'fields': ('start_time', 'end_time', 'time_limit')}),
         (_('Details'), {'fields': ('description', 'og_image', 'tags', 'summary')}),
-        (_('Rating'), {'fields': ('is_rated', 'rate_all', 'rate_exclude')}),
+        # (_('Rating'), {'fields': ('is_rated', 'rate_all', 'rate_exclude')}),
         (_('Organization'), {'fields': ('is_private', 'organizations', 'access_code')}),
     )
     list_display = ('key', 'name', 'is_public', 'is_rated', 'start_time', 'end_time', 'time_limit', 'user_count')
