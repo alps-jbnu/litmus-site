@@ -56,7 +56,6 @@ class ContestTagAdmin(admin.ModelAdmin):
 class ContestProblemInlineForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContestProblemInlineForm, self).__init__(*args, **kwargs)
-        self.fields['points'].initial = 100
 
     class Meta:
         widgets = {'problem': HeavySelect2Widget(data_view='problem_select2')}
