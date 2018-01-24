@@ -22,7 +22,6 @@ class Organization(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('organization title'))
     key = models.CharField(max_length=6, verbose_name=_('identifier'), unique=True,
                            help_text=_('Organization name shows in URL'),
-                           default=generator.make_section_key(),
                            validators=[RegexValidator('^[A-Za-z0-9]+$',
                                                       'Identifier must contain letters and numbers only')])
     short_name = models.CharField(max_length=20, verbose_name=_('short name'),

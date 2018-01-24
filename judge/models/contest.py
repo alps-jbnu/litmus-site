@@ -46,6 +46,14 @@ class ContestTag(models.Model):
         verbose_name_plural = _('contest tags')
 
 
+def today():
+    return timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+
+def days_hence(days=7):
+    date = today() + timezone.timedelta(days=days)
+    return timezone.localtime(date.replace(hour=23, minute=59, second=59))
+
+
 class Contest(models.Model):
     key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=gen.make_key,
                            validators=[RegexValidator('^[a-zA-Z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
@@ -54,9 +62,11 @@ class Contest(models.Model):
                                         related_name='organizers+')
     description = models.TextField(verbose_name=_('description'), blank=True)
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
-    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
-    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
-    time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True)
+    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True, default=today)
+    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True, default=days_hence)
+    time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True,
+                                      help_text=_('User must solve problems within the time given. '
+                                                  'Leave it blank to disable.'))
     is_public = models.BooleanField(verbose_name=_('publicly visible'), default=False,
                                     help_text=_('Should be set even for organization-private contests, where it '
                                                 'determines whether the contest is visible to members of the '
@@ -85,7 +95,7 @@ class Contest(models.Model):
     user_count = models.IntegerField(verbose_name=_('the amount of live participants'), default=0)
     summary = models.TextField(blank=True, verbose_name=_('contest summary'),
                                help_text=_('Plain-text, shown in meta description tag, e.g. for social media.'))
-    access_code = models.CharField(verbose_name=_('access code'), blank=True, default=gen.make_random_fruit, max_length=255,
+    access_code = models.CharField(verbose_name=_('access code'), blank=True, max_length=255,
                                    help_text=_('An optional code to prompt contestants before they are allowed '
                                                'to join the contest. Leave it blank to disable.'))
 
@@ -233,7 +243,7 @@ class ContestParticipation(models.Model):
 class ContestProblem(models.Model):
     problem = models.ForeignKey(Problem, verbose_name=_('problem'), related_name='contests')
     contest = models.ForeignKey(Contest, verbose_name=_('contest'), related_name='contest_problems')
-    points = models.IntegerField(verbose_name=_('points'))
+    points = models.IntegerField(verbose_name=_('points'), default=100)
     partial = models.BooleanField(default=True, verbose_name=_('partial'))
     is_pretested = models.BooleanField(default=False, verbose_name=_('is pretested'))
     order = models.PositiveIntegerField(db_index=True, verbose_name=_('order'))
