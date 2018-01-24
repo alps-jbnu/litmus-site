@@ -11,7 +11,6 @@ from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
 
 from judge.fulltext import SearchQuerySet
 from judge.models.profile import Profile
@@ -119,7 +118,7 @@ class Problem(models.Model):
     is_public = models.BooleanField(verbose_name=_('publicly visible'), db_index=True, default=False)
     is_manually_managed = models.BooleanField(verbose_name=_('manually managed'), db_index=True, default=False,
                                               help_text=_('Whether judges should be allowed to manage data or not'))
-    date = models.DateTimeField(verbose_name=_('date of publishing'), null=True, blank=True, db_index=True, default=now,
+    date = models.DateTimeField(verbose_name=_('date of publishing'), null=True, blank=True, db_index=True,
                                 help_text=_("Doesn't have magic ability to auto-publish due to backward compatibility"))
     banned_users = models.ManyToManyField(Profile, verbose_name=_('personae non gratae'), blank=True,
                                           help_text=_('Bans the selected users from submitting to this problem'))

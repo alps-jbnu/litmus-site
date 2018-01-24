@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.forms import ModelForm
 from django.utils.html import format_html
 from django.utils.translation import ugettext, ungettext, ugettext_lazy as _
+from django.utils.timezone import now
 from reversion.admin import VersionAdmin
 
 from judge.models import Profile, LanguageLimit, ProblemTranslation, Problem, ProblemClarification
@@ -27,6 +28,7 @@ class ProblemForm(ModelForm):
         self.fields['change_message'].widget.attrs.update({
             'placeholder': ugettext('Describe the changes you made (optional)')
         })
+        self.fields['date'].initial = now
 
     class Meta:
         widgets = {
