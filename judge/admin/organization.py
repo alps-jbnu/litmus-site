@@ -7,9 +7,17 @@ from reversion.admin import VersionAdmin
 
 from judge.models import Organization, Profile
 from judge.widgets import HeavySelect2MultipleWidget, HeavySelect2Widget, HeavyPreviewAdminPageDownWidget
+from judge.utils import generator
 
 
 class OrganizationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(OrganizationForm, self).__init__(*args, **kwargs)
+        generated_key = generator.make_section_key()
+        self.fields['name'].initial = generated_key
+        self.fields['key'].initial = generated_key
+        self.fields['short_name'].initial = generated_key
+
     class Meta:
         widgets = {
             'admins': HeavySelect2MultipleWidget(data_view='profile_select2'),
