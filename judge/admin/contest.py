@@ -93,9 +93,9 @@ class ContestAdmin(VersionAdmin):
         (None, {'fields': ('key', 'name', 'organizers', 'is_public', 'use_clarifications',
                            'hide_problem_tags', 'run_pretests_only')}),
         (_('Scheduling'), {'fields': ('start_time', 'end_time', 'time_limit')}),
-        (_('Details'), {'fields': ('description', 'og_image', 'tags', 'summary')}),
         # (_('Rating'), {'fields': ('is_rated', 'rate_all', 'rate_exclude')}),
         (_('Organization'), {'fields': ('is_private', 'organizations', 'access_code')}),
+        (_('Details'), {'fields': ('description', 'og_image', 'tags', 'summary')}),
     )
     list_display = ('key', 'name', 'is_public', 'is_rated', 'start_time', 'end_time', 'time_limit', 'user_count')
     actions = ['make_public', 'make_private']
