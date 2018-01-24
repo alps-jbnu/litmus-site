@@ -7,12 +7,13 @@ from django.db.models import TextField, Q
 from django.forms import ModelForm, ModelMultipleChoiceField
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ungettext
 from reversion.admin import VersionAdmin
 
 from judge.models import Contest, ContestProblem, Profile, Rating
 from judge.ratings import rate_contest
-from judge.utils.generator import GenerateRandomFruitTextInput
+from judge.utils.generator import make_key, GenerateRandomFruitTextInput
 from judge.widgets import HeavySelect2Widget, HeavySelect2MultipleWidget, AdminPagedownWidget, Select2MultipleWidget, \
     HeavyPreviewAdminPageDownWidget, Select2Widget
 
@@ -70,12 +71,24 @@ class ContestProblemInline(admin.TabularInline):
     form = ContestProblemInlineForm
 
 
+def today():
+    return timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
+
+def days_hence(days=7):
+    date = today() + timezone.timedelta(days=days)
+    return timezone.localtime(date.replace(hour=23, minute=59, second=59))
+
+
 class ContestForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContestForm, self).__init__(*args, **kwargs)
         if 'rate_exclude' in self.fields:
             self.fields['rate_exclude'].queryset = \
                 Profile.objects.filter(contest_history__contest=self.instance).distinct()
+        self.fields['key'].initial = make_key()
+        self.fields['start_time'].initial = today()
+        self.fields['end_time'].initial = days_hence()
+
 
     class Meta:
         widgets = {

@@ -12,7 +12,6 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from judge.models.problem import Problem
 from judge.models.profile import Profile, Organization
 from judge.models.submission import Submission
-import judge.utils.generator as gen
 
 __all__ = ['Contest', 'ContestTag', 'ContestParticipation', 'ContestProblem', 'ContestSubmission', 'Rating']
 
@@ -46,24 +45,16 @@ class ContestTag(models.Model):
         verbose_name_plural = _('contest tags')
 
 
-def today():
-    return timezone.localtime(timezone.now()).replace(hour=0, minute=0, second=0, microsecond=0)
-
-def days_hence(days=7):
-    date = today() + timezone.timedelta(days=days)
-    return timezone.localtime(date.replace(hour=23, minute=59, second=59))
-
-
 class Contest(models.Model):
-    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True, default=gen.make_key,
+    key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True,
                            validators=[RegexValidator('^[a-zA-Z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('contest name'), db_index=True)
     organizers = models.ManyToManyField(Profile, help_text=_('These people will be able to edit the contest.'),
                                         related_name='organizers+')
     description = models.TextField(verbose_name=_('description'), blank=True)
     problems = models.ManyToManyField(Problem, verbose_name=_('problems'), through='ContestProblem')
-    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True, default=today)
-    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True, default=days_hence)
+    start_time = models.DateTimeField(verbose_name=_('start time'), db_index=True)
+    end_time = models.DateTimeField(verbose_name=_('end time'), db_index=True)
     time_limit = models.DurationField(verbose_name=_('time limit'), blank=True, null=True,
                                       help_text=_('User must solve problems within the time given. '
                                                   'Leave it blank to disable.'))
