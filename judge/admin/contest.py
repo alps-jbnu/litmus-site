@@ -12,6 +12,7 @@ from reversion.admin import VersionAdmin
 
 from judge.models import Contest, ContestProblem, Profile, Rating
 from judge.ratings import rate_contest
+from judge.utils.generator import GenerateRandomFruitTextInput
 from judge.widgets import HeavySelect2Widget, HeavySelect2MultipleWidget, AdminPagedownWidget, Select2MultipleWidget, \
     HeavyPreviewAdminPageDownWidget, Select2Widget
 
@@ -80,7 +81,8 @@ class ContestForm(ModelForm):
         widgets = {
             'organizers': HeavySelect2MultipleWidget(data_view='profile_select2'),
             'organizations': HeavySelect2MultipleWidget(data_view='organization_select2'),
-            'tags': Select2MultipleWidget
+            'tags': Select2MultipleWidget,
+            'access_code': GenerateRandomFruitTextInput
         }
 
         if HeavyPreviewAdminPageDownWidget is not None:
