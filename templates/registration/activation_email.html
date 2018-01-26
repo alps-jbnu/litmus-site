@@ -1,24 +1,20 @@
-<div style="display:block;margin: 0 2px;padding: 1em;border: 3px solid #FFDE05;background-color: #000;border-radius: 6px;font-size: .95em;color: #444;margin-bottom:0.75em">
-<div style="display:table;margin-left:2em"><img src="https://avatars1.githubusercontent.com/u/6934864?v=3&s=101" style="display:inline;vertical-align: middle">
-<h1 style="font-size:4em;display:inline;vertical-align: middle"><a href="//{{ site.domain }}" style="text-decoration:none;color:gray"><span style="color: #FFDE05">DM::</span>OJ</a>
-      </h1>
+<div style="display:block;margin: 0 2px;padding: 1em;background-color: #111;color: #333;overflow: hidden;box-sizing:border-box;">
+  <div style="display:table;margin-left:2em; ">
+    <a href="http://{{ site.domain }}" style="text-decoration:none;color:#eee;">
+        <img src="http://litmus.ga:8000/static/icons/logo-site-bordered.png" style="font-size: 6em;font-weight: bold;font-family: monospace, sans-serif;display:inline;vertical-align: middle" alt="Litmus">
+    </a>
+  </div>
 </div>
-</div>
-<div style="display:block;margin: 0 2px;padding: 1em;border: 3px solid #2980B9;background-color: #f8f8f8;border-radius: 6px;font-size: .95em;color: #444;">
+<div style="display:block;margin: 0 2px;padding: 1em;background-color: #f8f8f8;font-size: .95em;color: #333;">
 
-<b>Thanks for registering on the {{ site.name }}! We're glad to have you.</b><br><br>
-The last step is activating your account. Please activate your {{ SITE_NAME }} account in 7 days.<br>To activate, just reply to this email with this exact text:
-<pre style="margin-left:1em">
+<p><b>{{ site.name }}에 가입해주셔서 감사합니다!</b> 진심으로 환영합니다.<br><br></p>
+<p>회원님께서는 <u>{{ SITE_NAME }}</u>를 이용하기 위하여 <b>7일 이내에</b> 계정을 활성화해야합니다.<br>활성화를 위한 인증 코드는 다음과 같습니다.</p>
+<pre style="padding:2em;text-align: center; background-color: #eee;">
 {{ activation_key }}
 </pre>
-Alternatively, click the button below to activate your account.
-<p align="center">
-<a href="http://{{ site.domain }}/accounts/activate/{{ activation_key }}/" style="cursor: pointer;display:block;text-align: center;padding: 4px 2px 5px;color: white;border: 1px solid #666;border-radius: 1px;background: #2980b9;background: linear-gradient(180deg, #00aee0, #2980b9);text-decoration: none;line-height:2em;font-size:1emm;width:12em;">Activate</a>
-</p>
 
-{% if SITE_ADMIN_EMAIL %}
-See you soon! If you have problems activating your account, feel free to shoot us an email at <a href="mailto:{{ SITE_ADMIN_EMAIL }}">{{ SITE_ADMIN_EMAIL }}</a>
-{% else %}
-See you soon!
-{% endif %}
+<p>또는 아래의 버튼을 클릭하여 인증을 완료할 수 있습니다.
+<p align="center">
+<a href="http://{{ site.domain }}/accounts/activate/{{ activation_key }}/" style="cursor: pointer;display:block;text-align: center;padding: 3px 6px;color: white;border: 1px solid #4A89DC;border-radius: 2px;background: #5D9CEC;text-decoration: none;font-size:1.2em;width:100%; max-width:150px;">인증 완료</a>
+</p>
 </div>
