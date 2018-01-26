@@ -1,1 +1,1 @@
-Activate your {{ SITE_NAME }} account
+{{ SITE_NAME }} 가입 인증 메일입니다.
