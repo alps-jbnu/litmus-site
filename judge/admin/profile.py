@@ -8,6 +8,8 @@ from django_ace import AceWidget
 from judge.models import Profile
 from judge.widgets import Select2Widget, AdminPagedownWidget
 
+from django_summernote.widgets import SummernoteWidget
+
 
 class ProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -24,8 +26,8 @@ class ProfileForm(ModelForm):
             'ace_theme': Select2Widget,
             'current_contest': Select2Widget,
         }
-        if AdminPagedownWidget is not None:
-            widgets['about'] = AdminPagedownWidget
+        if SummernoteWidget is not None:
+            widgets['about'] = SummernoteWidget
 
 
 class TimezoneFilter(admin.SimpleListFilter):
