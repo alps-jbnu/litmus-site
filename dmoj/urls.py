@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
+from django.conf.urls.static import static as url_static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.sitemaps.views import sitemap
@@ -322,7 +323,9 @@ urlpatterns = [
         url(r'^contest/$', ContestSelect2View.as_view(), name='contest_select2'),
         url(r'^comment/$', CommentSelect2View.as_view(), name='comment_select2'),
     ])),
-]
+
+    url(r'^summernote/', include('django_summernote.urls')),
+] + url_static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 favicon_paths = ['apple-touch-icon-180x180.png', 'apple-touch-icon-114x114.png', 'android-chrome-72x72.png',
                  'apple-touch-icon-57x57.png', 'apple-touch-icon-72x72.png', 'apple-touch-icon.png', 'mstile-70x70.png',

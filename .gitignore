@@ -13,3 +13,4 @@ sass_processed
 *.log
 *.conf
 *.ini
+media/
