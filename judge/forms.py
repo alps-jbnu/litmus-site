@@ -15,6 +15,8 @@ from judge.utils.subscription import newsletter_id
 from judge.widgets import MathJaxPagedownWidget, HeavyPreviewPageDownWidget, PagedownWidget, \
     Select2Widget, Select2MultipleWidget
 
+from django_summernote.widgets import SummernoteWidget
+
 
 def fix_unicode(string, unsafe=tuple(u'\u202a\u202b\u202d\u202e')):
     return string + (sum(k in unsafe for k in string) - string.count(u'\u202c')) * u'\u202c'
@@ -37,10 +39,7 @@ class ProfileForm(ModelForm):
         }
 
         if HeavyPreviewPageDownWidget is not None:
-            widgets['about'] = HeavyPreviewPageDownWidget(
-                preview=reverse_lazy('profile_preview'),
-                attrs={'style': 'max-width:700px;min-width:700px;width:700px'}
-            )
+            widgets['about'] = SummernoteWidget
 
     def clean(self):
         organizations = self.cleaned_data.get('organizations') or []
