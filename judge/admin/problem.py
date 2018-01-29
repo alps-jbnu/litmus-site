@@ -16,6 +16,17 @@ from judge.models import Solution
 from judge.widgets import HeavySelect2MultipleWidget, Select2MultipleWidget, Select2Widget, \
     HeavyPreviewAdminPageDownWidget, HeavyPreviewPageDownWidget, CheckboxSelectMultipleWithSelectAll
 
+from django_summernote.widgets import SummernoteWidget
+
+
+def read_file_content(filename):
+    import os, dmoj.settings as settings
+    try:
+        with open(os.path.join(settings.BASE_DIR, filename)) as f:
+            return f.read()
+    except:
+        return ''
+
 
 class ProblemForm(ModelForm):
     change_message = forms.CharField(max_length=256, label='Edit reason', required=False)
@@ -29,6 +40,7 @@ class ProblemForm(ModelForm):
             'placeholder': ugettext('Describe the changes you made (optional)')
         })
         self.fields['date'].initial = now
+        self.fields['description'].initial = read_file_content('templates/problem_default_template.html')
 
     class Meta:
         widgets = {
@@ -39,8 +51,8 @@ class ProblemForm(ModelForm):
             'types': Select2MultipleWidget,
             'group': Select2Widget,
         }
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['description'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('problem_preview'), template='pagedown-problem.html')
+        if SummernoteWidget is not None:
+            widgets['description'] = SummernoteWidget()
 
 
 class ProblemCreatorListFilter(admin.SimpleListFilter):

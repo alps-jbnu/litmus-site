@@ -225,8 +225,8 @@
 {% endblock %}
 
 {% block description %}
-    {% cache 86400 'problem_html' problem.id MATH_ENGINE LANGUAGE_CODE %}
-        {{ description|markdown("problem", MATH_ENGINE)|reference|str|safe }}
+    {% cache 86400 'problem_html' problem.id LANGUAGE_CODE %}
+        {{ description|safe }}
     {% endcache %}
 
     {% with license=problem.license %}
