@@ -6,8 +6,10 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from reversion.admin import VersionAdmin
 
 from judge.models import Organization, Profile
-from judge.widgets import HeavySelect2MultipleWidget, HeavySelect2Widget, HeavyPreviewAdminPageDownWidget
+from judge.widgets import HeavySelect2MultipleWidget, HeavySelect2Widget
 from judge.utils import generator
+
+from django_summernote.widgets import SummernoteWidget
 
 
 class OrganizationForm(ModelForm):
@@ -23,8 +25,8 @@ class OrganizationForm(ModelForm):
             'admins': HeavySelect2MultipleWidget(data_view='profile_select2'),
             'registrant': HeavySelect2Widget(data_view='profile_select2'),
         }
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['about'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('organization_preview'))
+        if SummernoteWidget is not None:
+            widgets['about'] = SummernoteWidget()
 
 
 class OrganizationAdmin(VersionAdmin):

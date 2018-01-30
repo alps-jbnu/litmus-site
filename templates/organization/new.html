@@ -4,7 +4,7 @@
 {% block media %}{{ form.media.css }}{% endblock %}
 
 {% block body %}
-    <form action="" method="post" class="form-area">
+    <form action="" method="post" class="form-area" style="width:100%">
         {% csrf_token %}
         <table border="0" style="text-align:left">{{ form.as_table() }}</table>
         <button type="submit">{{ _('Create') }}</button>

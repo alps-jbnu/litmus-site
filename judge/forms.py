@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_ace import AceWidget
 from judge.models import Organization, Profile, Submission, PrivateMessage, Language
 from judge.utils.subscription import newsletter_id
-from judge.widgets import MathJaxPagedownWidget, HeavyPreviewPageDownWidget, PagedownWidget, \
+from judge.widgets import MathJaxPagedownWidget, PagedownWidget, \
     Select2Widget, Select2MultipleWidget
 
 from django_summernote.widgets import SummernoteWidget
@@ -103,8 +103,8 @@ class EditOrganizationForm(ModelForm):
         model = Organization
         fields = ['name', 'key', 'about']
         widgets = {}
-        if HeavyPreviewPageDownWidget is not None:
-            widgets['about'] = HeavyPreviewPageDownWidget(preview=reverse_lazy('organization_preview'))
+        if SummernoteWidget is not None:
+            widgets['about'] = SummernoteWidget()
 
 
 class NewMessageForm(ModelForm):
