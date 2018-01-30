@@ -17,6 +17,8 @@ from judge.utils.generator import make_key, GenerateRandomFruitTextInput
 from judge.widgets import HeavySelect2Widget, HeavySelect2MultipleWidget, AdminPagedownWidget, Select2MultipleWidget, \
     HeavyPreviewAdminPageDownWidget, Select2Widget
 
+from django_summernote.widgets import SummernoteWidget
+
 
 class HeavySelect2Widget(HeavySelect2Widget):
     @property
@@ -98,8 +100,9 @@ class ContestForm(ModelForm):
             'access_code': GenerateRandomFruitTextInput
         }
 
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['description'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('contest_preview'))
+        if SummernoteWidget is not None:
+            widgets['description'] = SummernoteWidget()
+
 
 class ContestAdmin(VersionAdmin):
     fieldsets = (
