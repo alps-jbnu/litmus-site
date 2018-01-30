@@ -63,11 +63,6 @@
                                     {% if logged_in %}
                                         {% set can_edit = node.author.id == profile.id and not profile.mute %}
                                         {% if can_edit %}
-                                            <a data-featherlight="{{ url('comment_edit_ajax', node.id) }}"
-                                               href="{{ url('comment_edit', node.id) }}"
-                                               title="{{ _('Edit') }}" class="edit-link">
-                                            <i class="fa fa-pencil fa-fw"></i>
-                                        </a>
                                         {% else %}
                                             <a href="javascript:comment_set_parent({{ node.id }})"
                                                title="{{ _('Reply') }}">
@@ -78,10 +73,6 @@
                                             {% if can_edit %}
                                                 <a href="javascript:comment_set_parent({{ node.id }})"
                                                    title="{{ _('Reply') }}"><i class="fa fa-reply fa-fw"></i></a>
-                                            {% else %}
-                                                <a data-featherlight="{{ url('comment_edit_ajax', node.id) }}"
-                                                   href="{{ url('comment_edit', node.id) }}" title="{{ _('Edit') }}"
-                                                   class="edit-link"><i class="fa fa-pencil fa-fw"></i></a>
                                             {% endif %}
                                             <a href="javascript:" title="{{ _('Hide') }}" data-id="{{ node.id }}"
                                                class="hide-comment"><i class="fa fa-trash fa-fw"></i></a>
@@ -95,7 +86,7 @@
                                 <div class="comment-title"{% if not node.title or node.title.startswith('Re:') %}
                                      style="display: none"{% endif %}>{{ node.title }}</div>
                                 <div class="comment-body">
-                                    {{ node.body|markdown('comment', MATH_ENGINE, True)|reference|str|safe }}
+                                    {{ node.body|safe }}
                                 </div>
                             </div>
                         </div>

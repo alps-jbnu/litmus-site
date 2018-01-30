@@ -19,7 +19,8 @@ from reversion.models import Revision, Version
 from judge.dblock import LockModel
 from judge.models import Comment, Profile, CommentVote, Problem, Submission
 from judge.utils.raw_sql import unique_together_left_join, RawSQLColumn
-from judge.widgets import HeavyPreviewPageDownWidget
+
+from django_summernote.widgets import SummernoteWidget
 
 
 class CommentForm(ModelForm):
@@ -30,9 +31,8 @@ class CommentForm(ModelForm):
             'parent': forms.HiddenInput(),
         }
 
-        if HeavyPreviewPageDownWidget is not None:
-            widgets['body'] = HeavyPreviewPageDownWidget(preview=reverse_lazy('comment_preview'),
-                                                         preview_timeout=1000, hide_preview_button=True)
+        if SummernoteWidget is not None:
+            widgets['body'] = SummernoteWidget()
 
     def __init__(self, request, *args, **kwargs):
         self.request = request
