@@ -8,7 +8,9 @@ from reversion.admin import VersionAdmin
 
 from judge.dblock import LockModel
 from judge.models import NavigationBar
-from judge.widgets import HeavySelect2MultipleWidget, HeavyPreviewAdminPageDownWidget, HeavySelect2Widget
+from judge.widgets import HeavySelect2MultipleWidget, HeavySelect2Widget
+
+from django_summernote.widgets import SummernoteWidget
 
 
 class NavigationBarAdmin(DraggableMPTTAdmin):
@@ -50,9 +52,9 @@ class BlogPostForm(ModelForm):
             'authors': HeavySelect2MultipleWidget(data_view='profile_select2', attrs={'style': 'width: 100%'}),
         }
 
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['content'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('blog_preview'))
-            widgets['summary'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('blog_preview'))
+        if SummernoteWidget is not None:
+            widgets['content'] = SummernoteWidget()
+            widgets['summary'] = SummernoteWidget()
 
 
 class BlogPostAdmin(VersionAdmin):
@@ -86,14 +88,14 @@ class SolutionForm(ModelForm):
             'problem': HeavySelect2Widget(data_view='problem_select2', attrs={'style': 'width: 250px'}),
         }
 
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['content'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('solution_preview'))
+        if SummernoteWidget is not None:
+            widgets['content'] = SummernoteWidget()
 
 
 class LicenseForm(ModelForm):
     class Meta:
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets = {'text': HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('license_preview'))}
+        if SummernoteWidget is not None:
+            widgets = {'text': SummernoteWidget()}
 
 
 class LicenseAdmin(admin.ModelAdmin):

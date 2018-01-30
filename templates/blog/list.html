@@ -94,10 +94,10 @@
                 {% for post in posts %}
                     <section class="{% if post.sticky %}sticky {% endif %}post">
                         <h2 class="title">
+                            {%- if post.sticky %}<i title="Sticky" class="fa fa-star fa-fw"></i>&nbsp;{% endif -%}
                             <a href="{{ url('blog_post', post.id, post.slug) }}">{{ post.title }}</a>
                         </h2>
                         <span class="time">
-                            {%- if post.sticky %}<i title="Sticky" class="fa fa-star fa-fw"></i>{% endif -%}
                             {% with authors=post.authors.all() %}
                                 {%- if authors -%}
                                     <span class="post-authors">{{ link_users(authors) }}</span>
@@ -113,7 +113,7 @@
                         </span>
                         <div class="summary content-description">
                             {% cache 86400 'post_summary' post.id %}
-                                {{ post.summary|default(post.content, true)|markdown('blog', 'svg', lazy_load=True)|reference|str|safe }}
+                                {{ post.summary|default(post.content, true)|reference|str|safe }}
                             {% endcache %}
                         </div>
                     </section>
