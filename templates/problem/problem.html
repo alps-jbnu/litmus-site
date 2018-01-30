@@ -259,7 +259,7 @@
                     <div class="problem-clarification">
                         <div class="time">{{ relative_time(clarification.date) }}</div>
                         <span class="body">
-                            {{ clarification.description|markdown('problem', MATH_ENGINE)|reference }}
+                            {{ clarification.description|safe }}
                         </span>
                     </div>
                 {% endfor %}

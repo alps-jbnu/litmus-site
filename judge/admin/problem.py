@@ -81,8 +81,8 @@ class LanguageLimitInline(admin.TabularInline):
 
 class ProblemClarificationForm(ModelForm):
     class Meta:
-        if HeavyPreviewPageDownWidget is not None:
-            widgets = {'description': HeavyPreviewPageDownWidget(preview=reverse_lazy('comment_preview'))}
+        if SummernoteWidget is not None:
+            widgets = {'description': SummernoteWidget()}
 
 
 class ProblemClarificationInline(admin.StackedInline):
@@ -102,8 +102,8 @@ class ProblemSolutionForm(ModelForm):
             'authors': HeavySelect2MultipleWidget(data_view='profile_select2', attrs={'style': 'width: 100%'}),
         }
 
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets['content'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('solution_preview'))
+        if SummernoteWidget is not None:
+            widgets['content'] = SummernoteWidget()
 
 
 class ProblemSolutionInline(admin.StackedInline):
@@ -115,8 +115,8 @@ class ProblemSolutionInline(admin.StackedInline):
 
 class ProblemTranslationForm(ModelForm):
     class Meta:
-        if HeavyPreviewAdminPageDownWidget is not None:
-            widgets = {'description': HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('problem_preview'))}
+        if SummernoteWidget is not None:
+            widgets = {'description': SummernoteWidget()}
 
 
 class ProblemTranslationInline(admin.StackedInline):
