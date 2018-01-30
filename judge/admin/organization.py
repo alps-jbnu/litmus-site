@@ -66,7 +66,7 @@ class OrganizationAdmin(VersionAdmin):
     def get_form(self, request, *args, **kwargs):
         form = super(OrganizationAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['registrant'].initial = request.user
-        form.base_fields['admins'].initial = request.user
+        form.base_fields['admins'].initial = (request.user,)
         return form
 
 
