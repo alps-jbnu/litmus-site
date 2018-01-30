@@ -38,7 +38,7 @@ class ProfileForm(ModelForm):
             'ace_theme': Select2Widget(attrs={'style': 'width:200px'})
         }
 
-        if HeavyPreviewPageDownWidget is not None:
+        if SummernoteWidget is not None:
             widgets['about'] = SummernoteWidget
 
     def clean(self):
