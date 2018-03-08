@@ -14,3 +14,4 @@ sass_processed
 *.conf
 *.ini
 media/
+node_modules/
