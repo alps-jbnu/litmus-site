@@ -2086,7 +2086,7 @@ msgstr "소속들"
 #: judge/views/organization.py:83
 #, python-format
 msgid "%s Members"
-msgstr "%s 명"
+msgstr "%s 사람들"
 
 #: judge/views/organization.py:113 judge/views/organization.py:115
 msgid "Joining organization"
