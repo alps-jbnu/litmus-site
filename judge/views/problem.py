@@ -620,6 +620,7 @@ def clone_problem(request, problem):
     problem.pk = None
     problem.is_public = False
     problem.code += '-clone'
+    problem.code = problem.code[:20]
     problem.name += ' (clone)'
     problem.user_count = 0
     problem.ac_rate = 0.0
