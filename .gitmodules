@@ -6,3 +6,6 @@
 	path = resources/libs
 	url = https://github.com/DMOJ/site-assets.git
 	branch = master
+[submodule "static/semantic-ui"]
+	path = static/semantic-ui
+	url = https://github.com/Semantic-Org/Semantic-UI-CSS
