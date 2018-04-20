@@ -31,7 +31,7 @@
             <script type="text/javascript">
                 window.rejudge_submission = function (id, e) {
                     if ((typeof e !== 'undefined' && e.ctrlKey) ||
-                        confirm('Are you sure you want to rejudge?')) {
+                        confirm('재채점 하시겠습니까?')) {
                         $.ajax({
                             url: '{{ url('submission_rejudge') }}',
                             type: "POST",
@@ -260,7 +260,7 @@
                 <a href="javascript:void(0)">{{ _('You were disconnected. Refresh to show latest updates.') }}</a>
             </div>
 
-            <table id="submissions-table" class="table">
+            <table id="submissions-table" class="ui celled table">
                 <colgroup>
                     <col class="sub-result">
                     <col class="sub-info">

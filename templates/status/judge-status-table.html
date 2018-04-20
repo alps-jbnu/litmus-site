@@ -1,3 +1,4 @@
+<thead>
 <tr>
     <th>{{ _('Judge') }}</th>
     {% if see_all_judges %}
@@ -8,7 +9,9 @@
     <th>{{ _('Load') }}</th>
     <th>{{ _('Runtimes') }}</th>
 </tr>
+</thead>
 
+<tbody>
 {% for judge in judges %}
     <tr>
         <td>
@@ -65,3 +68,4 @@
         </td>
     </tr>
 {% endfor %}
+</tbody>

@@ -1,0 +1,73 @@
+<div class"search-box" style="margin-bottom: 1em;">
+    <form id="filter-form" name="form" action="" method="GET">
+        <div style="margin-bottom: .5em;">
+            {% if request.user.is_authenticated %}
+            <div class="ui checkbox hide_solved">
+                <input type="checkbox" name="hide_solved" value="1" {% if hide_solved %}checked{% endif %} />
+                <label for="hide_solved">{{ _('Hide solved problems') }}</label>
+            </div>
+            {% endif %}
+
+            <div class="ui checkbox show_types" style="margin-left:1em;">
+                <input  type="checkbox" name="show_types" value="1" {% if show_types %} checked{% endif %} />
+                <label for="show_types">{{ _('Show problem types') }}</label>
+            </div>
+        </div>
+        <div style="margin-bottom: .5em;">
+            <div class="ui icon fluid input">
+                <select name="category" class="ui search dropdown">
+                    {% if category %}
+                        <option value="" selected="selected">{{ _('All') }}</option>
+                    {% else %}
+                        <option value="">{{ _('All') }}</option>
+                    {% endif %}
+                    {% for group in categories %}
+                        <option value="{{ group.id }}"{% if group.id == category %} selected{% endif %}>
+                            {{ group.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                &nbsp;
+                {% if show_types %}
+                    <select name="type" multiple="multiple" class="ui search dropdown">
+                        <option value="">{{ _('Filter by type...') }}</option>
+                        {% for type in problem_types %}
+                            <option value="{{ type.id }}"{% if type.id in selected_types %} selected{% endif %}>
+                                {{ type.full_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+
+                <div class="ui icon input" style="width: 100%; margin-left: 5px;">
+                    <i class="search icon"></i>
+                    <input id="search" type="text" name="search" value="{{ search_query or '' }}" placeholder="{{ _('Search problems...') }}" style="margin:0; height:100%; " />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--
+<div class="sidebox">
+    <h3>{{ _('Problem search') }} <i class="fa fa-search"></i>
+    </h3>
+    <div class="sidebox-content">
+        <form id="filter-form" name="form" action="" method="get">
+
+
+
+            {% if point_values %}
+                <div class="form-label">{{ _('Point range') }}</div>
+                <div id="point-slider"></div>
+            {% endif %}
+            <input id="point-start" type="hidden" name="point_start" disabled="disabled">
+            <input id="point-end" type="hidden" name="point_end" disabled="disabled">
+            <div class="form-submit-group">
+                <a id="go" class="button">{{ _('Go') }}</a>
+                <a id="random" class="button">{{ _('Random') }}</a>
+            </div>
+        </form>
+    </div>
+</div>
+-->
