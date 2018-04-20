@@ -57,6 +57,7 @@
         <link rel="stylesheet" type="text/css" href="{{ static('libs/clipboard/tooltip.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('libs/select2/select2.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('semantic-ui/semantic.min.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ static('responsive.css') }}">
     {% endcompress %}
     <link rel="canonical"
           href="{{ DMOJ_SCHEME }}://{{ DMOJ_CANONICAL|default(site.domain) }}{{ request.get_full_path() }}">
@@ -177,34 +178,50 @@
         </style>
     </noscript>
 </head>
-<body>
+<body class="pushable">
+
+<!-- Sidebar for mobile -->
+<div class="ui left vertical inverted sidebar labeled icon menu uncover">
+{% for node in mptt_tree(nav_bar) recursive %}
+    {% with children=node.get_children() %}
+        {% if children %}
+            {{ loop(children) }}
+        {% else %}
+            <a class="nav-{{ node.key }} {% if node.key in nav_tab %}blue active {% endif %} item" href="{{ node.path }}">{{ user_trans(node.label) }}</a>
+        {% endif %}
+    {% endwith %}
+{% endfor %}
+</div>
+
+<div class="pusher">
+
 <nav id="navigation" class="unselectable">
     <div class="ui inverted menu" style="border-radius:0;">
         <a id="navicon" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
-		<div class="item" style="padding:0 1em;"><a href="{{ url('home') }}">{% include "site-logo-fragment.html" %}</a></div>
-		{% for node in mptt_tree(nav_bar) recursive %}
-			{% with children=node.get_children() %}
-				{% if children %}
-					{% if node.level == 0 %}
-					<div class="ui pointing dropdown link nav-{{ node.key }} item">
-						<span class="text">{{ user_trans(node.label) }}</span>
-						<i class="dropdown icon"></i>
-					{% else %}
-					<div class="nav-{{ node.key }} item">
-						<i class="dropdown icon"></i>
-						<span class="text">{{ user_trans(node.label) }}</span>
-					{% endif %}
-						<div class="menu">
-							{{ loop(children) }}
-						</div>
-					</div>
-				{% else %}
-					<a href="{{ node.path }}" class="nav-{{ node.key }} {% if node.key in nav_tab %}blue active {% endif %}item">
-						{{ user_trans(node.label) }}
-					</a>
-				{% endif %}
-			{% endwith %}
-		{% endfor %}
+        <div class="mobile hidden item" style="padding:0 1em;"><a href="{{ url('home') }}">{% include "site-logo-fragment.html" %}</a></div>
+        {% for node in mptt_tree(nav_bar) recursive %}
+            {% with children=node.get_children() %}
+                {% if children %}
+                    {% if node.level == 0 %}
+                    <div class="ui pointing dropdown link nav-{{ node.key }} mobile hidden item">
+                        <span class="text">{{ user_trans(node.label) }}</span>
+                        <i class="dropdown icon"></i>
+                    {% else %}
+                    <div class="nav-{{ node.key }} item">
+                        <i class="dropdown icon"></i>
+                        <span class="text">{{ user_trans(node.label) }}</span>
+                    {% endif %}
+                        <div class="menu">
+                            {{ loop(children) }}
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ node.path }}" class="nav-{{ node.key }} {% if node.key in nav_tab %}blue active {% endif %}mobile hidden item">
+                        {{ user_trans(node.label) }}
+                    </a>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
 
         <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}
@@ -248,7 +265,12 @@
         </div>
     </div>
 </nav>
-<script type="text/javascript">$(document).ready(function(){$(".ui.dropdown.item").dropdown({on: 'hover'});});</script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('.ui.dropdown.item').dropdown({on: 'hover'});
+    $('.ui.sidebar').sidebar('attach events', '#navicon');
+});
+</script>
 {% if request.in_contest %}
     <div id="contest-info">
         <a href="{{ url('contest_view', request.participation.contest.key) }}" style="vertical-align: middle">
@@ -312,5 +334,7 @@
         </span>
     </footer>
 </div>
+
+</div> <!--// pusher -->
 </body>
 </html>
