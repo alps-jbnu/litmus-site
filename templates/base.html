@@ -179,70 +179,76 @@
 </head>
 <body>
 <nav id="navigation" class="unselectable">
-    <div id="nav-container">
+    <div class="ui inverted menu" style="border-radius:0;">
         <a id="navicon" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
-        <ul id="nav-list">
-            <li class="home-nav-element"><a href="{{ url('home') }}">{% include "site-logo-fragment.html" %}</a></li>
-            <li class="home-nav-element"><span class="nav-divider"></span></li>
-            <li class="home-menu-item"><a href="{{ url('home') }}" class="nav-home">{{ _('Home') }}</a></li>
-            {% for node in mptt_tree(nav_bar) recursive %}
-                <li>
-                    <a href="{{ node.path }}" class="nav-{{ node.key }}{% if node.key in nav_tab %} active{% endif %}">
-                        {{ user_trans(node.label) }}
-                        {% if not node.is_leaf_node %}
-                            <div href="javascript:void(0)" class="nav-expand">></div>
-                        {% endif %}
-                    </a>
-                    {% with children=node.get_children() %}
-                        {% if children %}<ul>{{ loop(children) }}</ul>{% endif %}
-                    {% endwith %}
-                </li>
-            {% endfor %}
-        </ul>
+		<div class="item" style="padding:0 1em;"><a href="{{ url('home') }}">{% include "site-logo-fragment.html" %}</a></div>
+		{% for node in mptt_tree(nav_bar) recursive %}
+			{% with children=node.get_children() %}
+				{% if children %}
+					{% if node.level == 0 %}
+					<div class="ui pointing dropdown link nav-{{ node.key }} item">
+						<span class="text">{{ user_trans(node.label) }}</span>
+						<i class="dropdown icon"></i>
+					{% else %}
+					<div class="nav-{{ node.key }} item">
+						<i class="dropdown icon"></i>
+						<span class="text">{{ user_trans(node.label) }}</span>
+					{% endif %}
+						<div class="menu">
+							{{ loop(children) }}
+						</div>
+					</div>
+				{% else %}
+					<a href="{{ node.path }}" class="nav-{{ node.key }} {% if node.key in nav_tab %}blue active {% endif %}item">
+						{{ user_trans(node.label) }}
+					</a>
+				{% endif %}
+			{% endwith %}
+		{% endfor %}
 
-        <span id="user-links">
+        <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}
-                <ul>
-                    <li>
-                        <a href="{{ url('user_page') }}">
-                            <span>
-                                <img src="{{ gravatar(request.user, 32) }}" height="24" width="24">{# -#}
-                                <span>
-                                    {%- trans username=request.user.username -%}
-                                        Hello, <b>{{ username }}</b>.
-                                    {%- endtrans %}
-                                </span>
-                            </span>
-                        </a>
-                        <ul style="width: 150px">
-                            {% if request.user.is_staff or request.user.is_superuser %}
-                                <li><a href="{{ url('admin:index') }}">{{ _('Admin') }}</a></li>
-                            {% endif %}
-                            <li><a href="{{ url('user_edit_profile') }}">{{ _('Edit profile') }}</a></li>
-                            {% if request.user.is_impersonate %}
-                                <li><a href="{{ url('impersonate-stop') }}">Stop impersonating</a></li>
-                            {% else %}
-                                <li>
-                                    <form action="{{ url('auth_logout') }}" method="POST">
-                                        {% csrf_token %}
-                                        <button type="submit">{{ _('Log out') }}</button>
-                                    </form>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                </ul>
+                <div class="ui poiting dropdown link item">
+					<span class="text">
+						<img src="{{ gravatar(request.user, 32) }}" height="24" width="24">{# -#}
+						<span>
+							{%- trans username=request.user.username -%}
+								Hello, <b>{{ username }}</b>.
+							{%- endtrans %}
+						</span>
+					</span>
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						{% if request.user.is_staff or request.user.is_superuser %}
+							<a class="item" href="{{ url('admin:index') }}">{{ _('Admin') }}</a>
+						{% endif %}
+						<a class="item" href="{{ url('user_page') }}">{{ _('Show Profile') }}</a>
+						<a class="item" href="{{ url('user_edit_profile') }}">{{ _('Edit profile') }}</a>
+						<div class="divider"></div>
+						{% if request.user.is_impersonate %}
+							<a class="item" href="{{ url('impersonate-stop') }}">Stop impersonating</a>
+						{% else %}
+							<div class="item">
+								<form action="{{ url('auth_logout') }}" method="POST">
+									{% csrf_token %}
+									<button class="ui red basic fluid button" type="submit">{{ _('Log out') }}</button>
+								</form>
+							</li>
+						{% endif %}
+					</div>
+                </div>
             {% else %}
-                <span class="anon">
-                    <a href="{{ url('auth_login') }}?next={{ LOGIN_RETURN_PATH|urlencode }}">
-                        <b>{{ _('Login') }}</b>
-                    </a>&nbsp;|&nbsp;<a href="{{ url('registration_register') }}">{{ _('Register') }}</a>
-                </span>
+                <a href="{{ url('auth_login') }}?next={{ LOGIN_RETURN_PATH|urlencode }}" class="link item">
+                    <b>{{ _('Login') }}</b>
+                </a>
+				<a href="{{ url('registration_register') }}" class="link item">
+					{{ _('Register') }}
+				</a>
             {% endif %}
-        </span>
+        </div>
     </div>
-    <div id="nav-shadow"></div>
 </nav>
+<script type="text/javascript">$(document).ready(function(){$(".ui.dropdown.item").dropdown({on: 'hover'});});</script>
 {% if request.in_contest %}
     <div id="contest-info">
         <a href="{{ url('contest_view', request.participation.contest.key) }}" style="vertical-align: middle">
