@@ -67,51 +67,56 @@
         </div>
     </div>
 
-    <div class="content-description">
-        {% cache 3600 'contest_html' contest.id %}
+    <div class="content-description" style="padding:3em 5px">
+        {% cache 0 'contest_html' contest.id %}
             {{ contest.description|safe }}
         {% endcache %}
+        <span class="social">
+            {{ post_to_gplus(request, contest, '<i class="fa fa-google-plus-square"></i>') }}
+            {{ post_to_facebook(request, contest, '<i class="fa fa-facebook-official"></i>') }}
+            {{ post_to_twitter(request, SITE_NAME + ':', contest, '<i class="fa fa-twitter"></i>') }}
+        </span>
     </div>
 
     {% if contest.ended or request.user.is_superuser or is_organizer %}
-        <hr>
+        <div class="ui divider"></div>
         <div class="contest-problems">
-            <h2 style="margin-bottom: 0.2em"><i class="fa fa-fw fa-question-circle"></i>{{ _('Problems') }} </h2>
-            <table id="contest-problems" class="table">
+            <h2 class="ui header"><i class="lightbulb icon"></i>{{ _('Problems') }} </h2>
+            <table id="contest-problems" class="ui celled table">
                 <thead>
                 <tr>
                     <th>{{ _('Problem') }}</th>
                     <th>{{ _('Points') }}</th>
                     <th>{{ _('AC Rate') }}</th>
                     <th>{{ _('Users') }}</th>
-                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for problem in contest_problems %}
                     <tr>
-                        <td><a href="{{ url('problem_detail', problem.code) }}">{{ problem.i18n_name }}</a></td>
-                        <td>{{ problem.points|floatformat }}{% if problem.partial %}p{% endif %}</td>
-                        <td>{{ problem.ac_rate|floatformat(1) }}%</td>
-                        <td><a href="{{ url('ranked_submissions', problem.code) }}">{{ problem.user_count }}</a></td>
                         <td>
+                            <a href="{{ url('problem_detail', problem.code) }}">{{ problem.i18n_name }}</a>
+                            {%- if problem.partial -%}
+                                <span style="margin-left: 1em;" class="ui green tiny label">부분 점수</span>
+                            {%- endif -%}
                             {%- if problem.has_editorial -%}
-                                <a href="{{ url('problem_editorial', problem.code) }}">{{ _('Editorial') }}</a>
+                                <a href="{{ url('problem_editorial', problem.code) }}" style="margin-left: 1em;" class="ui icon label"><i class="book icon"></i> {{ _('Editorial') }}</a>
                             {%- endif -%}
                         </td>
+                        <td>{{ problem.points|floatformat }}</td>
+                        <td>{{ problem.ac_rate|floatformat(1) }}%</td>
+                        <td><a href="{{ url('ranked_submissions', problem.code) }}">{{ problem.user_count }}</a></td>
                     </tr>
                 {% endfor %}
+                {% if not contest_problems %}
+                    <tr>
+                        <td class="center aligned" colspan="4">등록된 문제가 아직 없습니다.</td>
+                    </tr>
+                {% endif %}
                 </tbody>
             </table>
         </div>
     {% endif %}
-
-    <hr>
-    <span class="social">
-        {{ post_to_gplus(request, contest, '<i class="fa fa-google-plus-square"></i>') }}
-        {{ post_to_facebook(request, contest, '<i class="fa fa-facebook-official"></i>') }}
-        {{ post_to_twitter(request, SITE_NAME + ':', contest, '<i class="fa fa-twitter"></i>') }}
-    </span>
 
     {% include "comments/list.html" %}
 {% endblock %}

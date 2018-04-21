@@ -52,21 +52,38 @@
 
 {% macro contest_head(contest) %}
     {% spaceless %}
-        <a href="{{ url('contest_view', contest.key) }}" class="contest-list-title">
+        {% if not contest.is_public %}
+        <span class="ui circular grey label">
+            <i class="low vision icon" style="margin:0"></i>
+        </span>
+        &nbsp;
+        {% endif %}
+
+        <a href="{{ url('contest_view', contest.key) }}" class="contest-list-title" style="vertical-align: text-top;">
             {{- contest.name -}}
-        </a><span class="contest-tags">
+        </a>
+        &nbsp;
+
+        <a href="{{ url('contest_ranking', contest.key) }}" class="ui icon label">
+            <i class="fa fa-user"></i>
+            <span class="detail">{{ contest.user_count }}</span>
+        </a>
+
+        {% if contest.is_private %}
+        <span class="ui icon label">
+            <i class="fa fa-lock"></i>
+            <span class="detail">사설</span>
+        </span>
+        {% endif %}
+
+        <span class="contest-tags">
             {% for tag in contest.tags.all() %}
-                <span style="background-color: {{ tag.color }}" class="contest-tag">
-                    <a href="{{ url('contest_tag', tag.name) }}"
-                       style="color: {{ tag.text_color }}"
+                <a class="ui label" style="margin: 0 5px; background-color: {{ tag.color }}; color: {{ tag.text_color }};" href="{{ url('contest_tag', tag.name) }}"
                        data-featherlight="{{ url('contest_tag_ajax', tag.name) }}">
-                        {{- tag.name -}}
-                    </a>
-                </span>
+                    {{- tag.name -}}
+                </a>
             {% endfor %}
         </span>
-        {% if not contest.is_public %}<i class="fa fa-eye-slash"></i>{% endif %}
-        {% if contest.is_private %}<i class="fa fa-lock"></i>{% endif %}
     {% endspaceless %}
 {% endmacro %}
 
@@ -90,15 +107,11 @@
 {% block body %}
     <div class="content-description">
         {% if current_contests %}
-            <h4>{{ _('Ongoing Contests') }}</h4>
-            <table class="contest-list dmoj table striped">
+            <h3><i class="fa fa-fw fa-trophy"></i> {{ _('Ongoing Contests') }}</h3>
+            <table class="ui celled padded striped table">
                 <thead>
                 <tr>
-                    <th style="width:90%">{{ _('Contest') }}</th>
-                    <th>{{ _('Users') }}</th>
-                    {% if not request.in_contest %}
-                        <th style="width:15%"></th>
-                    {% endif %}
+                    <th colspan="2">{{ _('Contest') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -118,18 +131,15 @@
                                 {% endif %}
                             </div>
                         </td>
-                        <td>
-                            <a href="{{ url('contest_ranking', contest.key) }}">{{ contest.user_count }}</a>
-                        </td>
                         {% if not request.in_contest %}
-                            <td>
+                            <td style="width: 15%; vertical-align: middle;">
                                 {% if request.user.profile in contest.organizers.all() %}
                                     <a href="{{ url('contest_join', contest.key) }}"
-                                       class="unselectable button full participate-button">{{ _('Spectate') }}</a>
+                                       class="ui brown fluid button">{{ _('Spectate') }}</a>
                                 {% else %}
                                     <a href="{{ url('contest_join', contest.key) }}"
-                                       class="unselectable button full participate-button join-warning">
-                                        {{- _('Join') -}}
+                                       class="ui primary fluid button">
+                                        {{ _('Join') }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -141,9 +151,9 @@
             <br>
         {% endif %}
 
-        <h4>{{ _('Upcoming Contests') }}</h4>
+        <h3>{{ _('Upcoming Contests') }}</h3>
         {% if future_contests %}
-            <table class="contest-list dmoj table striped">
+            <table class="ui padded striped table">
                 <thead>
                 <tr>
                     <th>{{ _('Contest') }}</th>
@@ -168,20 +178,16 @@
                 </tbody>
             </table>
         {% else %}
-            <i>{{ _('There are no scheduled contests at this time.') }}</i>
+            <p><i>{{ _('There are no scheduled contests at this time.') }}</i></p>
             <br>
         {% endif %}
         <br>
 
-        <h4>{{ _('Past Contests') }}</h4>
-        <table class="contest-list dmoj table striped">
+        <h3>{{ _('Past Contests') }}</h3>
+        <table class="ui padded celled striped table">
             <thead>
             <tr>
-                <th style="width:90%">{{ _('Contest') }}</th>
-                <th>{{ _('Users') }}</th>
-                {% if not request.in_contest %}
-                    <th style="width:15%"></th>
-                {% endif %}
+                <th colspan="2">{{ _('Contest') }}</th>
             </tr>
             </thead>
             <tbody>
@@ -193,12 +199,12 @@
                             {{ time_left(contest) }}
                         </div>
                     </td>
-                    <td><a href="{{ url('contest_ranking', contest.key) }}">{{ contest.user_count }}</a>
-                    </td>{% if not request.in_contest %}
-                    <td><a href="{{ url('contest_join', contest.key) }}"
-                           class="unselectable button full participate-button">{{ _('Virtual join') }}</a>
-                    </td>
-                {% endif %}
+                    {% if not request.in_contest %}
+                        <td style="width: 15%; vertical-align: middle;">
+                            <a href="{{ url('contest_join', contest.key) }}"
+                               class="ui teal fluid button">{{ _('Virtual join') }}</a>
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

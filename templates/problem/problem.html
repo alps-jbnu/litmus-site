@@ -65,7 +65,7 @@
                 </a>
             {% endif %}
         {% endif %}
-        <h2 style="color:#393630; display: inline-block">{{ title }}</h2>
+        <h1 class="ui huge header">{{ title }}</h1>
         {% if has_pdf_render %}
             <span class="spacer"></span>
             <a href="{{ url('problem_pdf', problem.code) }}" class="view-pdf">
@@ -137,40 +137,6 @@
     {% endif %}
     <hr>
     <br>
-    <div class="problem-info-entry">
-        <i class="fa fa-check fa-fw"></i><span class="pi-name">{{ _('Points:') }}</span>
-        <span class="pi-value">
-            {% if contest_problem %}
-                {{ contest_problem.points }}{% if contest_problem.partial %} {{ _('(partial)') }}{% endif %}
-            {% else %}
-                {{ problem.points|floatformat }}{% if problem.partial %} {{ _('(partial)') }}{% endif %}
-            {% endif %}
-        </span>
-    </div>
-    <div class="problem-info-entry">
-        <i class="fa fa-clock-o fa-fw"></i><span class="pi-name">{{ _('Time limit:') }}</span>
-        <span class="pi-value">{{ problem.time_limit }}초</span>
-    </div>
-    <div class="problem-lang-limits">
-        {% for name, limit in problem.language_time_limit %}
-            <div class="lang-limit">
-                <span class="lang-name">{{ name }}</span>
-                <span class="lang-tl">{{ limit }}초</span>
-            </div>
-        {% endfor %}
-    </div>
-    <div class="problem-info-entry">
-        <i class="fa fa-server fa-fw"></i><span class="pi-name">{{ _('Memory limit:') }}</span>
-        <span class="pi-value">{{ problem.memory_limit|kbsimpleformat }}</span>
-    </div>
-    <div class="problem-lang-limits">
-        {% for name, limit in problem.language_memory_limit %}
-            <div class="lang-limit">
-                <span class="lang-name">{{ name }}</span>
-                <span class="lang-ml">{{ limit|kbsimpleformat }}</span>
-            </div>
-        {% endfor %}
-    </div>
     {% cache 86400 'problem_authors' problem.id LANGUAGE_CODE %}
         {% with authors=problem.authors.all() %}
             {% if authors %}
@@ -197,7 +163,11 @@
                     Problem types
                 {% endtrans %}
                 </div>
-                <div style="display:none" class="toggled">{{ problem.types_list|join(", ") }}</div>
+                <div style="display:none" class="toggled">
+                    {% for type in problem.types_list %}
+                        <a href="#" class="ui basic label">{{ type }}</a>&nbsp;
+                    {% endfor %}
+                </div>
             {% endwith %}
         </div>
         <br>
@@ -211,11 +181,12 @@
                 {% with usable=problem.usable_common_names, langs=problem.languages_list() %}
                     {% for lang in langs %}
                         {% if lang in usable %}
-                            {{ lang }}
+                            <span class="ui green basic label" style="margin-top: 5px;">{{ lang }}</span>
                         {% else %}
-                            <s title="{{ _('No %(lang)s judge online', lang=lang) }}">{{ lang }}</s>
+                            <span class="ui grey basic label" style="margin-top: 5px;">
+                                <strike data-tooltip="{{ _('No %(lang)s judge online', lang=lang) }}">{{ lang }}</strike>
+                            </span>
                         {% endif %}
-                        {% if not loop.last %}, {% endif %}
                     {% endfor %}
                 {% endwith %}
             </div>
@@ -225,7 +196,56 @@
 {% endblock %}
 
 {% block description %}
-    {% cache 60 'problem_html' problem.id LANGUAGE_CODE %}
+    <table class="ui compact center aligned very basic table">
+        <thead>
+        <tr>
+            <th>
+                <i class="fa fa-check fa-fw"></i> {{ _('Points:') }}
+            </th>
+            <th>
+                <i class="fa fa-clock-o fa-fw"></i> {{ _('Time limit:') }}
+            </th>
+            <th>
+                <i class="fa fa-server fa-fw"></i> {{ _('Memory limit:') }}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                {% if contest_problem %}
+                    {{ contest_problem.points }}{% if contest_problem.partial %} {{ _('(partial)') }}{% endif %}
+                {% else %}
+                    {{ problem.points|floatformat }}{% if problem.partial %} {{ _('(partial)') }}{% endif %}
+                {% endif %}
+            </td>
+            <td>
+                {{ problem.time_limit }}초
+                <span class="problem-lang-limits">
+                {% for name, limit in problem.language_time_limit %}
+                    <div class="ui image label">
+                        {{ name }}
+                        <div class="detail">{{ limit }}초</div>
+                    </div>
+                {% endfor %}
+                </span>
+            </td>
+            <div class="detail">
+            <td>
+                {{ problem.memory_limit|kbsimpleformat }}
+                <span class="problem-lang-limits">
+                {% for name, limit in problem.language_memory_limit %}
+                    <div class="ui image label">
+                        {{ name }}
+                        <div class="detail">{{ limit|kbsimpleformat }}</div>
+                    </div>
+                {% endfor %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    {% cache 0 'problem_html' problem.id LANGUAGE_CODE %}
         {{ description|safe }}
     {% endcache %}
 

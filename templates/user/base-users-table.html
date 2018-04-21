@@ -1,11 +1,11 @@
 <thead>
 <tr>
-    <th class="header rank">{{ rank_header or _("Rank") }}</th>
+    <th style="width: 5em;">{{ rank_header or _("Rank") }}</th>
     {% block after_rank_head %}{% endblock %}
-    <th class="header username">{{ _('Username') }}</th>
+    <th style="min-width: 15em">{{ _('Username') }}</th>
     {% block before_point_head %}{% endblock %}
 
-    <th class="header points">
+    <th>
         {% if sort_links %}<a href="{{ sort_links.performance_points }}">{% endif %}
         {{ _('Points') }}
         {%- if sort_links %}{{ sort_order.performance_points }}</a>{% endif %}
