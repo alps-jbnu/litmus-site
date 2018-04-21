@@ -294,7 +294,7 @@ $(document).ready(function(){
     <br>
     <main id="content">
         {% block title_row %}
-            <h2 style="color:#393630; display:inline">
+            <h2 class="ui header">
                 {% block content_title %}
                     {% if content_title %}{{ content_title }}{% else %}{{ title }}{% endif %}
                 {% endblock %}
@@ -302,7 +302,7 @@ $(document).ready(function(){
         {% endblock %}
         {% block header %}{% endblock %}
         {% block title_ruler %}
-            <hr>
+            <div class="ui divider"></div>
         {% endblock %}
         <div id="content-body">{% block body %}{% endblock %}</div>
     </main>
@@ -312,27 +312,64 @@ $(document).ready(function(){
     {% endif %}
 
     {% block bodyend %}{% endblock %}
+</div>
 
-    <footer>
-        <span id="footer-content">
-            <br>
-            <a style="color: #808080" href="https://dmoj.ca">proudly powered by <b>DMOJ</b></a> |
-            {% if i18n_config.footer %}
+<!-- footer -->
+<div class="ui inverted vertical footer segment">
+    <div class="ui container">
+      <div class="ui stackable inverted divided equal height stackable grid">
+        <div class="three wide column">
+          <h4 class="ui inverted header">Sitemap</h4>
+          <div class="ui inverted link list">
+            {% for node in mptt_tree(nav_bar) recursive %}
+                {% with children=node.get_children() %}
+                    {% if children %}
+                        {{ loop(children) }}
+                    {% else %}
+                        <a href="{{ node.path }}" class="nav-{{ node.key }} {% if node.key in nav_tab %}blue active {% endif %} item">
+                            {{ user_trans(node.label) }}
+                        </a>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+          </div>
+        </div>
+        <div class="three wide column">
+          <h4 class="ui inverted header">Services</h4>
+          <div class="ui inverted link list">
+            <a href="http://litmus.jbnu.ac.kr/" class="item">Litmus Online Judge</a>
+            <a href="http://litmus2.jbnu.ac.kr/" class="active item">Litmus Online Judge V2</a>
+            <a href="http://alps.jbnu.ac.kr/" class="item">ALPS @ CBNU</a>
+            <a href="http://acm.jbnu.ac.kr/cupc/" class="item">CUPC 2018</a>
+          </div>
+        </div>
+        <div class="seven wide column">
+          <h4 class="ui inverted header">Contact us</h4>
+          <p><a href="mailto:alps.jbnu@gmail.com" class="footer link" style="color: white;">alps.jbnu@gmail.com</a></p>
+          <p style="color: #999;">
+            Copyright 2017-2018 by ALPS. All Rights Reserved. <br>
+            <a style="color: #808080" href="https://dmoj.ca">proudly powered by <b>DMOJ</b></a>
+          </p>
+          
+          <div class="ui inverted link list">
+              {% if i18n_config.footer %}
                 {{ i18n_config.footer|safe }} |
-            {% endif %}
-            <form action="{{ url('set_language') }}" method="post" style="display: inline">
+              {% endif %}
+              <form action="{{ url('set_language') }}" method="post" style="display: inline">
                 {% csrf_token %}
-            <input name="next" type="hidden" value="{{ request.get_full_path() }}">
-            <select name="language" onchange="form.submit()" style="height: 1.5em">
+              <input name="next" type="hidden" value="{{ request.get_full_path() }}">
+              <select class="ui dropdown" name="language" onchange="form.submit()" style="color: black;">
                 {% for language in language_info_list(LANGUAGES) %}
                     <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
                         {{ language.name_local }} ({{ language.code }})
                     </option>
                 {% endfor %}
-            </select>
-          </form>
-        </span>
-    </footer>
+              </select>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
 
 </div> <!--// pusher -->
