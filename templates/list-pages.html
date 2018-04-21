@@ -1,31 +1,34 @@
-<ul class="pagination">
+<div class="ui right floated pagination inverted menu" id="pagination" style="margin: 1em auto;">
     {% if page_obj.has_previous() %}
         {% if page_obj.previous_page_number() == 1 and first_page_href != None %}
-            <li><a href="{{ first_page_href }}">«</a></li>
+            <a class="icon item" href="{{ first_page_href }}">
+                <i class="left chevron icon"></i>
+            </a>
         {% else %}
-            <li><a href="{{ page_prefix or '' }}{{ page_obj.previous_page_number() }}{{ page_suffix or '' }}">«</a></li>
-        {% endif %}
-    {% else %}
-        <li class="disabled-page"><span>«</span></li>
+            <a class="item" href="{{ page_prefix or '' }}{{ page_obj.previous_page_number() }}{{ page_suffix or '' }}">
+                <i class="left chevron icon"></i>
+            </a>
+        {% endif %} 
     {% endif %}
 
     {% for page in page_obj.page_range %}
         {% if not page %}
-            <li class="disabled-page"><span>...</span></li>
+            <a href="#" class="item">...</a>
         {% else %}
-            <li{% if page == page_obj.number %} class="active-page"{% endif %}><a href="
+            <a class="{% if page == page_obj.number %}yellow active {% endif %}item" href="
                 {%- if page == 1 and first_page_href != None -%}
                     {{ first_page_href }}
                 {%- else -%}
                     {{ page_prefix or '' }}{{ page }}{{ page_suffix or '' }}
                 {%- endif -%}
-            ">{{ page }}</a></li>
+            ">{{ page }}</a>
         {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next() %}
-        <li><a href="{{ page_prefix or '' }}{{ page_obj.next_page_number() }}{{ page_suffix or '' }}">»</a></li>
-    {% else %}
-        <li class="disabled-page"><span>»</span></li>
+        <a class="icon item" href="{{ page_prefix or '' }}{{ page_obj.next_page_number() }}{{ page_suffix or '' }}">
+            <i class="right chevron icon"></i>
+        </a>
     {% endif %}
-</ul>
+</div>
+
