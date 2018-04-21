@@ -38,33 +38,34 @@
 {% endblock %}
 
 {% block body %}
-    <div id="login-panel">
-        <form action="" method="post" class="form-area">
-            {% csrf_token %}
-            {% if form.errors %}
-                <div id="form-errors">
-                    <p class="error">{{ _('Invalid username or password.') }}</p>
-                </div>
-            {% endif %}
-            <table border="0" style="text-align:left">
-                <tr>
-                    <th><i class="fa fa-user fa-fw"></i>
-                    </th>
-                    <td>{{ form.username }}
-                    </td>
-                </tr>
-                <tr>
-                    <th><i class="fa fa-key fa-fw"></i>
-                    </th>
-                    <td>{{ form.password }}
-                    </td>
-                </tr>
-            </table>
-            <hr>
-            <button style="float:right;" type="submit">{{ _('Login!') }}</button>
+    <div class="ui vertical segment" style="max-width: 480px; margin:0 auto;">
+        <form class="ui large login form" method="POST">
+          {% csrf_token %}
+          {% if form.errors %}
+              <div class="ui red message">
+                  <p>{{ _('Invalid username or password.') }}</p>
+              </div>
+          {% endif %}
+          <div class="ui stacked segment">
+            <div class="field">
+              <div class="ui left icon input">
+                <i class="user icon"></i>
+                {{ form.username }}
+              </div>
+            </div>
+            <div class="field">
+              <div class="ui left icon input">
+                <i class="lock icon"></i>
+                {{ form.password }}
+              </div>
+            </div>
+            <div class="ui fluid large teal submit button">{{ _('Login!') }}</div>
             <input type="hidden" name="next" value="{{ next }}">
-        </form>
-        <br><a href="{{ url('password_reset') }}">{{ _('Forgot your password?') }}</a>
+          </div>
+
+          <div class="ui error message"></div>
+
+          <a href="{{ url('password_reset') }}">{{ _('Forgot your password?') }}</a>
 
         {% if form.has_google_auth or form.has_facebook_auth or form.has_github_auth or form.has_dropbox_auth %}
             <h4>{{ _('Or log in with...') }}</h4>
@@ -89,5 +90,7 @@
                 </a>
             {% endif %}
         {% endif %}
+        </form>
     </div>
+    <script>$(document).ready(function(){$(".login.form").form({});});</script>
 {% endblock %}
