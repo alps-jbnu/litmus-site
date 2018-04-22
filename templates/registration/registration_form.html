@@ -4,109 +4,10 @@
     {% include "timezone/media-css.html" %}
     {{ form.media.css }}
     <style>
-        .sortedm2m-container, .sortedm2m-container p.selector-filter {
-            width: 300px;
-        }
-
-        .sortedm2m-container p.selector-filter input {
-            width: 262px;
-        }
-
-        ul.sortedm2m {
-            width: 284px;
-            min-height: 100px;
-            max-height: 200px;
-        }
-
-        .sortedm2m-container, .sortedm2m-container p.selector-filter {
-            width: 300px;
-        }
-
-        .sortedm2m-container p.selector-filter input {
-            width: 262px;
-        }
-
-        ul.sortedm2m {
-            width: 284px;
-            min-height: 70px;
-            max-height: 200px;
-            height: 70px
-        }
-
-        .grayed {
-            color: #666;
-        }
-
-        .inline-header {
-            float: left;
-            font-size: 1.1em;
-            padding: 4px 8px;
-            padding-left: 0;
-        }
-
-        .block-header {
-            color: #555;
-            font-size: 1.1em;
-            font-weight: 600;
-            padding-bottom: 0.2em;
-            padding-left: 2px;
-            margin-top: 0.75em
-        }
-
-        .fullwidth {
-            display: block;
-            overflow: hidden;
-        }
-
-        .fullwidth input {
-            width: 100%;
-        }
-
-        .fullwidth-error input {
-            width: 100%;
-            border-color: red;
-        }
-
-        .form-field-error {
-            color: red;
-        }
-
-        small {
-            font-size: 0.7em;
-            padding-left: 0.6em;
-        }
-
-        #edit-form {
-            border: unset;
-            background: unset;
-            max-width: 450px;
-            width: 450px;
-        }
-
-        #content-body {
-            text-align: center;
-        }
-
-        #center-float {
-            display: inline-block;
-            text-align: initial;
-            max-width: 450px;
-            width: 450px;
-        }
-
         ul.errorlist {
             margin: 0px;
-            text-align: right;
-            list-style: none;
-        }
-
-        .full-textfield {
-            padding-top: 0.5em;
-        }
-
-        .tos-section {
-            display: inline-block;
-            padding-right: 1em;
+            padding-left: 1em;
+            text-align: left;
         }
     </style>
 {% endblock %}
@@ -128,89 +29,101 @@
 {% endblock %}
 
 {% block body %}
-    <div id="center-float">
-        <form id="edit-form" action="" method="post" class="form-area">
+    <div class="ui vertical segment" style="max-width: 480px; margin:0 auto; padding: 2em 0;border:0">
+        <form class="ui large register form" method="POST">
             {% csrf_token %}
-
-            <div class="block-header">{{ _('Username') }}</div>
-            <span class="fullwidth{% if form.username.errors %}-error{% endif %}">{{ form.username }}</span>
-            {% if form.username.errors %}
-                <div class="form-field-error">{{ form.username.errors }}</div>
-            {% endif %}
-
-            <div class="block-header">{{ _('Email') }}</div>
-            <span class="fullwidth{% if form.email.errors %}-error{% endif %}">{{ form.email }}</span>
-            {% if form.email.errors %}
-                <div class="form-field-error">{{ form.email.errors }}</div>
-            {% endif %}
-
-            <div class="block-header">{{ _('Password') -}}
-                <small>(<a href="#" class="pass-req-link">?</a>)</small>
+            <div class="ui error message" {% if form.errors %} style="display: block;" {% endif %}>
+                <p>{{ form.errors }}</p>
             </div>
-            <div style="display: none" class="pass-req">
-                <ul>
-                    {% for validator in password_validators %}
-                        <li>{{ validator.get_help_text() }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <span class="fullwidth{% if form.password1.errors %}-error{% endif %}">{{ form.password1 }}</span>
-            {% if form.password1.errors %}
-                <div class="form-field-error">{{ form.password1.errors }}</div>
-            {% endif %}
-            <div class="block-header">{{ _('Password') }}<sup style="font-size: 0.7em;padding-left: 0.2em;">2</sup>{# -#}
-                <small>{{ _('(again, for confirmation)') }}</small>
-            </div>
-            <span class="fullwidth{% if form.password2.errors %}-error{% endif %}">{{ form.password2 }}</span>
-            {% if form.password2.errors %}
-                <div class="form-field-error">{{ form.password2.errors }}</div>
-            {% endif %}
 
-            <div class="block-header">{{ _('Timezone') }}<small>{{ _('(select your closest major city)') }}</small></div>
-            <div class="fullwidth">
-                <div>{{ form.timezone }}
-                    <div style="float: right">
-                        {{ _('or') }}
-                        <a id="open-map" href="#" data-featherlight=".map-wrap">{{ _('pick from map') }}</a>
+            <div class="ui stacked left aligned segment">
+                <div class="field {% if form.username.errors %}error{% endif %}">
+                    <label>{{ _('Username') }}</label>
+                    <div class="ui left icon input">
+                        <i class="user icon"></i>
+                        {{ form.username }}
                     </div>
                 </div>
-            </div>
-
-            <div class="block-header">{{ _('Default language') }}</div>
-            <span class="fullwidth">{{ form.language }}</span>
-
-            <div class="block-header">{{ _('Affiliated organizations') }}</div>
-            {{ form.organizations }}
-
-            {% if form.newsletter %}
-                <div style="padding-top: 0.5em;">{{ form.newsletter }}
-                    <label for="id_newsletter" style="float: unset;"
-                           class="inline-header grayed">{{ _('Notify me about upcoming contests') }}</label>
+                <div class="field {% if form.email.errors %}error{% endif %}">
+                    <label>{{ _('Email') }}</label>
+                    <div class="ui left icon input">
+                        <i class="mail icon"></i>
+                        {{ form.email }}
+                    </div>
                 </div>
-            {% endif %}
+                <div class="ui info message" style="text-align: left;">
+                    {% for validator in password_validators %}<li>{{ validator.get_help_text() }}</li>{% endfor %}
+                </div>
+                <div class="field {% if form.password1.errors %}error{% endif %}">
+                    <label>{{ _('Password') }}</label>
+                    <div class="ui left icon input">
+                        <i class="unlock icon"></i>
+                        {{ form.password1 }}
+                    </div>
+                </div>
+                <div class="field {% if form.password2.errors %}error{% endif %}">
+                    <label>{{ _('Password') }} <small>{{ _('(again, for confirmation)') }}</small></label>
+                    <div class="ui left icon input">
+                        <i class="lock icon"></i>
+                        {{ form.password2 }}
+                    </div>
+                </div>
 
-            {% if form.captcha %}
-                <div style="margin-top: 0.5em">{{ form.captcha }}</div>
-                {% if form.captcha.errors %}
-                    <div class="form-field-error">{{ form.captcha.errors }}</div>
+                <div class="field">
+                    <label><i class="world icon"></i> {{ _('Timezone') }} <small>{{ _('(select your closest major city)') }}</small></label>
+                    <div class="ui left input">
+                        {{ form.timezone }}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label><i class="code icon"></i> {{ _('Default language') }}</label>
+                    <div class="ui left input">
+                        {{ form.language }}
+                    </div>
+                </div>
+
+                <!-- extra infomations -->
+                {% if tos_url %}
+                    <div class="inline field">
+                        <div class="ui checkbox">
+                            <input type="checkbox" name="agree_tos" id="agree_tos" />
+                            <label>
+                                {{ _('By registering, you agree to our') }}
+                                <a href="{{ tos_url }}">{{ _('Terms & Conditions') }}</a>.
+                            </label>
+                        </div>
+                    </div>
                 {% endif %}
-            {% endif %}
 
-            <hr>
-            {% if tos_url %}
-                <span class="tos-section">
-                    {{ _('By registering, you agree to our') }}
-                    <a href="{{ tos_url }}">{{ _('Terms & Conditions') }}</a>.
-                </span>
-            {% endif %}
-            <button style="float:right;" type="submit">{{ _('Register!') }}</button>
+                {% if form.newsletter %}
+                    <div style="padding-top: 0.5em;">{{ form.newsletter }}
+                        <label for="id_newsletter" style="float: unset;"
+                               class="inline-header grayed">{{ _('Notify me about upcoming contests') }}</label>
+                    </div>
+                {% endif %}
+
+                {% if form.captcha %}
+                    <div style="margin-top: 0.5em">{{ form.captcha }}</div>
+                    {% if form.captcha.errors %}
+                        <div class="form-field-error">{{ form.captcha.errors }}</div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="ui fluid large teal submit button">{{ _('Register!') }}</div>
+            </div>
         </form>
     </div>
-
-    <div class="map-wrap">
-        <div class="map-inset">
-            <div class="map-axis-x"></div>
-            <div class="map-axis-y"></div>
-        </div>
-    </div>
+    <script type="text/javascript">$(document).ready(function(){
+        $(".register.form").form({
+            fields: {
+                username: ['minLength[4]', 'empty'],
+                email: ['email', 'empty'],
+                password1: ['minLength[8]', 'empty'],
+                password2: 'match[password1]',
+                agree_tos: 'checked'
+            }
+        });
+        $("input[type=checkbox]").checkbox();
+    });</script>
 {% endblock %}
