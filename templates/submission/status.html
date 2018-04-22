@@ -24,71 +24,134 @@
                         blocked = false;
                         if (request)
                             update();
-                    }, 500);
+                    }, 100);
                 }).fail(function (data) {
                     console.log('Failed to update testcases!');
                 });
-
+                /*
                 if ($(window).scrollTop() + $(window).height() > $(document).height() - 100)
                     $("html, body").animate({scrollTop: $(document).height()}, 0);
+                */
             }
 
             var receiver = new EventReceiver(
                 "{{ EVENT_DAEMON_LOCATION }}", "{{ EVENT_DAEMON_POLL_LOCATION }}",
                 ['sub_{{ submission.id }}'], {{ last_msg }}, function (message) {
+                    var $prog = $(".status.progress");
                     switch (message.type) {
                         case 'internal-error':
                         case 'grading-end':
+                            console.log('done', message);
+                            var result_message = '채점 끝! (' + message.points + '점)';
+                            setTimeout(function(){
+                                console.log('Done!');
+                                $prog.progress('set label', result_message);
+                                if (message.result == 'AC'){
+                                    console.log('AC');
+                                    $prog.progress('set success');
+                                } else {
+                                    console.log(message.result);
+                                    $prog.progress('set error');
+                                }
+                            }, 100);
                         case 'compile-error':
                             $('#abort-button').remove();
                             $('#grading-label').remove();
                         case 'test-case':
+                            if (message.type == 'test-case') {
+                                $prog.progress('increment', message.points);
+                            }
                         case 'grading-begin':
                         case 'processing':
-                            update();
+                            update(); 
+                            console.log(message);
                     }
                 }
-            )
+            );
+
+            console.log('submissions', '{{ submission.case_total }}');
+
+            $('.status.progress')
+              .progress({
+                text: {
+                  active  : '채점 중 ({value}/{{ submission.case_total }})',
+                  success : '맞았습니다!'
+                },
+                value: 0
+              })
+            ;
         });
         </script>
+    {% else %}
+        <script type="text/javascript">$(document).ready(function(){$('.status.progress').progress();})</script>
     {% endif %}
 {% endblock %}
 
 {% block body %}
     <br>
-    <div><a href="{{ url('submission_source', submission.id) }}">{{ _('View source') }}</a></div>
-    {% if request.user == submission.user.user or perms.judge.resubmit_other %}
-        <div><a href="{{ url('problem_submit', submission.problem.code, submission.id) }}">{{ _('Resubmit') }}</a></div>
-    {% endif %}
-    {% if perms.judge.rejudge_submission %}
-        <div>
-            <form action="{{ url('submission_rejudge') }}" method="post">
+
+    <div class="ui vertical segment">
+        <a href="{{ url('submission_source', submission.id) }}" class="ui basic button">{{ _('View source') }}</a>
+
+        {% if request.user == submission.user.user or perms.judge.resubmit_other %}
+            <a href="{{ url('problem_submit', submission.problem.code, submission.id) }}" class="ui basic button">{{ _('Resubmit') }}</a>
+        {% endif %}
+
+        {% if perms.judge.rejudge_submission %}
+            <form action="{{ url('submission_rejudge') }}" method="post" style="display: inline">
                 {% csrf_token %}
-                <a href="#" onclick="parentNode.submit()">{{ _('Rejudge') }}</a>
+                <a href="#" onclick="parentNode.submit()" class="ui red button">{{ _('Rejudge') }}</a>
                 <input type="hidden" name="id" value="{{ submission.id }}">
                 <input type="hidden" name="path" value="{{ url('submission_status', submission.id) }}">
             </form>
-        </div>
-    {% endif %}
-
-    <br>
-    <hr class="half-hr">
-    <br>
-
-    <div id="test-cases">{% include "submission/status-testcases.html" %}</div>
-
-    {% if not submission.is_graded %}
-        {% if request.user == submission.user.user or perms.judge.abort_any_submission %}
-            <div id="abort-button">
-                <br>
-                <hr class="half-hr">
-                <br>
-                <form action="{{ url('submission_abort', submission.id) }}" method="post">
-                    {% csrf_token %}
-                    <input style="float:left" type="submit" value="{{ _('Abort') }}" class="button">
-                    <br><br>
-                </form>
-            </div>
         {% endif %}
-    {% endif %}
+
+        {% if not submission.is_graded %}
+            {% if request.user == submission.user.user or perms.judge.abort_any_submission %}
+                <div id="abort-button" style="display: inline;">
+                    <form action="{{ url('submission_abort', submission.id) }}" method="post" style="display: inline">
+                        {% csrf_token %}
+                        <input type="submit" value="{{ _('Abort') }}" class="ui orange button">
+                    </form>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="ui indicating status progress" data-value="{{ submission.case_points or '0' }}" data-total="{{ submission.case_total or 100 }}">
+        <div class="bar">
+            <div class="progress"></div>
+        </div>
+        <div class="label">{{ submission.case_points or '0' }}/{{ submission.case_total }}점</div>
+    </div>
+
+    <div class="source-wrap">
+        <table>
+            <tr>
+                <td class="source-ln">
+                    <div>
+                        {% for line in raw_source.split('\n') %}
+                            <a href="#line-{{ loop.index }}" name="line-{{ loop.index }}">
+                                <pre class="line">{{ loop.index }}</pre>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td class="source-code">{{ highlighted_source }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <div class="ui vertical segment" id="test-cases">
+        {% include "submission/status-testcases.html" %}
+    </div>
+
+    <div class="ui indicating status progress" data-value="{{ submission.case_points or '0' }}" data-total="{{ submission.case_total or 100 }}">
+        <div class="bar">
+            <div class="progress"></div>
+        </div>
+        <div class="label">{{ submission.case_points or '0' }}/{{ submission.case_total }}점</div>
+    </div>
 {% endblock %}

@@ -113,6 +113,8 @@ class SubmissionStatus(SubmissionDetailBase):
         context['last_msg'] = event.last()
         context['batches'] = group_test_cases(submission.test_cases.all())
         context['time_limit'] = submission.problem.time_limit
+        context['raw_source'] = submission.source.rstrip('\n')
+        context['highlighted_source'] = highlight_code(submission.source, submission.language.pygments)
         try:
             lang_limit = submission.problem.language_limits.get(language=submission.language)
         except ObjectDoesNotExist:
