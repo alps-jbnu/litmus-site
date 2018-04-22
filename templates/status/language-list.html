@@ -16,6 +16,32 @@
         .table td {
             text-align: left;
         }
+
+        .pointing.header {
+            display: block;
+            clear: both;
+            margin-top: 2em;
+            margin-bottom: .5em;
+            padding: 0;
+            border-bottom: 1px dotted #eee;
+        }
+        .pointing.header .header {
+            display: inline-block;
+            border-radius: 0;
+            border-bottom: 3px solid #1883d5;
+        }
+        .lang-info {
+            border-left: 1em solid #f5f5f5;
+            background-color: #fdfdfd;
+            padding: 2em 1em;
+        }
+        .lang-info code {
+            margin: 0 4px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            background-color: #eee;
+        }
     </style>
 {% endblock %}
 
@@ -27,34 +53,20 @@
 {% endblock %}
 
 {% block body %}
-    <table class="dmoj table">
-        <thead>
-        <tr>
-            <th>{{ _('ID') }}</th>
-            <th>{{ _('Name') }}</th>
-            <th>{{ _('Runtime Info') }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for language in languages %}
-            {# All online languages have runtime_versions, even if we're not going to display them #}
-            {% if language.runtime_versions %}
-                <tr>
-                    <td>{{ language.short_display_name }}</td>
-                    <td class="language">{{ language.name }}</td>
-                    <td class="info">
-                        <code>{{ runtime_versions(language.runtime_versions()) }}</code>
-                        {% if language.description %}
-                            <div class="content-description">
-                                {% cache 86400 'language_html' language.id %}
-                                    {{ language.description|markdown('language') }}
-                                {% endcache %}
-                            </div>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-        </tbody>
-    </table>
+    {% for language in languages %}
+        {# All online languages have runtime_versions, even if we're not going to display them #}
+        {% if language.runtime_versions %}
+            <div class="pointing header">
+                <h2 class="header">{{ language.name }}</h2> <!-- {{ language.short_display_name }} -->
+            </div>
+            <blockquote class="lang-info">
+                <p>{{ runtime_versions(language.runtime_versions()) }}</p>
+                {% if language.description %}
+                    {% cache 86400 'language_html' language.id %}
+                        {{ language.description|markdown('language') }}
+                    {% endcache %}
+                {% endif %}
+            </blockquote>
+        {% endif %}
+    {% endfor %}
 {% endblock %}
