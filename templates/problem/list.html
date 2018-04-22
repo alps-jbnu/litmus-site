@@ -187,9 +187,7 @@
         <tr>
             {% if request.in_contest %}
                 <th class="problem">{{ _('Problem') }}</th>
-                {% if show_types %}
-                    <th>{{ _('Types') }}</th>
-                {% endif %}
+                <th></th>
                 <th class="points">{{ _('Points') }}</th>
             {% else %}
                 <th class="problem">
