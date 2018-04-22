@@ -1,0 +1,30 @@
+<div class"search-box" style="margin-bottom: 1em;">
+    <form id="filter-form" class="ui small form" name="form" action="" method="GET">
+        <div class="field" style="margin-bottom: .5em;">
+            <div class="two fields">
+                <div class="seven wide field">
+                    <select id="status" class="ui search fluid dropdown" name="status" multiple="multiple">
+                        <option value="">{{ _('Filter by status...') }}</option>
+                        {% for id, name in all_statuses %}
+                            <option {% if id in selected_statuses %}selected{% endif %}
+                                    value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="seven wide field">
+                    <select id="language" name="language" multiple="multiple" class="ui search fluid dropdown">
+                        <option value="">{{ _('Filter by language...') }}</option>
+                        {% for code, name in all_languages %}
+                            <option {% if code in selected_languages %}selected{% endif %}
+                                    value="{{ code }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="two wide field">
+                    <button type="submit" class="ui primary fluid button"><i class="filter icon"></i>&nbsp;필터</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script>$(document).ready(function(){$(".ui.dropdown").dropdown();});</script>
+</div>
