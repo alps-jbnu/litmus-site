@@ -48,6 +48,18 @@
             font-style: italic;
             text-align: center;
         }
+
+        .blog-content .ui.dividing.header,
+        .blog-content .ui.segment .ui.header,
+        .blog-sidebox .ui.dividing.header {
+            font-size: 1.5em;
+        }
+        .blog-sidebox .ui.dividing.header {
+            margin-bottom: 5px;
+        }
+        .blog-sidebox .ui.segment {
+            margin-top: 5px;
+        }
     </style>
 {% endblock %}
 
@@ -89,36 +101,42 @@
     </div>
     <div id="blog-container">
         <div class="blog-content sidebox">
-            <h3>{{ _('News') }} <i class="fa fa-terminal"></i></h3>
-            <div class="sidebox-content">
-                {% for post in posts %}
-                    <section class="{% if post.sticky %}sticky {% endif %}post">
-                        <h2 class="title">
-                            {%- if post.sticky %}<i title="Sticky" class="fa fa-star fa-fw"></i>&nbsp;{% endif -%}
-                            <a href="{{ url('blog_post', post.id, post.slug) }}">{{ post.title }}</a>
-                        </h2>
-                        <span class="time">
-                            {% with authors=post.authors.all() %}
-                                {%- if authors -%}
-                                    <span class="post-authors">{{ link_users(authors) }}</span>
-                                {%- endif -%}
-                            {% endwith %}
-                            {{ relative_time(post.publish_on, abs=_('posted on {time}'), rel=_('posted {time}')) -}}
-                        </span><span class="comment-data">
-                            <a href="{{ url('blog_post', post.id, post.slug) }}#comments" class="comment-count-link">
-                                <i class="fa fa-comments comment-icon"></i><span class="comment-count">
-                                    {{- post_comment_counts[post.id] or 0 -}}
-                                </span>
-                            </a>
-                        </span>
-                        <div class="summary content-description">
-                            {% cache 86400 'post_summary' post.id %}
-                                {{ post.summary|default(post.content, true)|reference|str|safe }}
-                            {% endcache %}
-                        </div>
-                    </section>
-                {% endfor %}
-            </div>
+            <h2 class="ui dividing header" style="border-radius:0;"><i class="fa fa-terminal"></i> {{ _('News') }}</h2>
+            {% for post in posts %}
+                <section class="ui {%if post.sticky %}stacked blue {% endif %}segment">
+                    <div class="ui header">
+                        <a href="{{ url('blog_post', post.id, post.slug) }}">
+                            {%- if post.sticky %}
+                                <i class="fa fa-star fa-fw"></i>&nbsp;
+                            {% endif -%}
+                            {{ post.title }}
+                        </a>
+                    </div>
+                    <span class="time">
+                        {% with authors=post.authors.all() %}
+                            {%- if authors -%}
+                                <span class="post-authors">{{ link_users(authors) }}</span>
+                            {%- endif -%}
+                        {% endwith %}
+                        {{ relative_time(post.publish_on, abs=_('posted on {time}'), rel=_('posted {time}')) -}}
+                    </span><span class="comment-data">
+                        <a href="{{ url('blog_post', post.id, post.slug) }}#comments" class="comment-count-link">
+                            <i class="fa fa-comments comment-icon"></i><span class="comment-count">
+                                {{- post_comment_counts[post.id] or 0 -}}
+                            </span>
+                        </a>
+                    </span>
+
+                    <div class="ui divider"></div>
+
+                    <div class="summary content-description">
+                        {% cache 60 'post_summary' post.id %}
+                            {{ post.summary|default(post.content, true)|reference|str|safe }}
+                        {% endcache %}
+                    </div>
+                </section>
+            {% endfor %}
+
             {% if page_obj.num_pages > 1 %}
                 <div style="margin-bottom:10px;margin-top:10px">{% include "list-pages.html" %}</div>
             {% endif %}
@@ -127,20 +145,20 @@
         <div class="blog-sidebar">
             {% if request.in_contest and request.participation.contest.use_clarifications %}
                 <div class="blog-sidebox sidebox">
-                    <h3>{{ _('Clarifications') }} <i class="fa fa-question-circle"></i></h3>
-                    <div class="sidebox-content">
+                    <h2 class="ui dividing header" style="border-radius:0;">
+                        <i class="fa fa-question-circle"></i> {{ _('Clarifications') }} 
+                    </h2>
+                    <div class="ui segment">
                         {% if has_clarifications %}
-                            <ul>
-                                {% for clarification in clarifications %}
-                                    <li class="clarification">
-                                        <a href="{{ url('problem_detail', clarification.problem.code) }}"
-                                           class="problem">
-                                            {{ clarification.problem.name }}
-                                        </a>
-                                        <span class="time">{{ relative_time(clarification.date) }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                            {% for clarification in clarifications %}
+                                <li class="clarification">
+                                    <a href="{{ url('problem_detail', clarification.problem.code) }}"
+                                       class="problem">
+                                        {{ clarification.problem.name }}
+                                    </a>
+                                    <span class="time">{{ relative_time(clarification.date) }}</span>
+                                </li>
+                            {% endfor %}
                         {% else %}
                             <p class="no-clarifications-message">
                                 {{ _('No clarifications have been made at this time.') }}
@@ -151,8 +169,10 @@
             {% endif %}
             {% if current_contests %}
                 <div class="blog-sidebox sidebox">
-                    <h3>{{ _('Ongoing contests') }} <i class="fa fa-trophy"></i></h3>
-                    <div class="sidebox-content">
+                    <h2 class="ui dividing header" style="border-radius:0;">
+                        <i class="fa fa-trophy"></i> {{ _('Ongoing contests') }}
+                    </h2>
+                    <div class="ui segment">
                         {% for contest in current_contests %}
                             <div class="contest">
                                 <div class="contest-list-title">
@@ -169,8 +189,10 @@
 
             {% if future_contests %}
                 <div class="blog-sidebox sidebox">
-                    <h3>{{ _('Upcoming contests') }} <i class="fa fa-trophy"></i></h3>
-                    <div class="sidebox-content">
+                    <h2 class="ui dividing header" style="border-radius:0;">
+                        <i class="fa fa-trophy"></i> {{ _('Upcoming contests') }}
+                    </h2>
+                    <div class="ui segment">
                         {% for contest in future_contests %}
                             <div class="contest">
                                 <div class="contest-list-title">
@@ -186,17 +208,18 @@
             {% endif %}
 
             <div class="blog-sidebox sidebox">
-                <h3>{{ _('Comment stream') }} <i class="fa fa-comments"></i></h3>
-                <div class="sidebox-content">
-                    <ul>
-                        {% for comment in comments %}
-                            <li>
-                                <span style="padding-left:0.25em" class="poster">
-                                    {{ link_user(comment.author) }}
-                                </span> &rarr;
-                                <a href="{{ comment.link }}#comment-{{ comment.id }}">{{ comment.page_title }}</a>
-                            </li>{% endfor %}
-                    </ul>
+                <h2 class="ui dividing header" style="border-radius:0;">
+                    <i class="fa fa-comments"></i> {{ _('Comment stream') }}
+                </h2>
+                <div class="ui segment">
+                    {% for comment in comments %}
+                        <li style="list-style:none;">
+                            <span style="padding-left:0.5em" class="poster">
+                                {{ link_user(comment.author) }}
+                            </span> &rarr;
+                            <a href="{{ comment.link }}#comment-{{ comment.id }}">{{ comment.page_title }}</a>
+                        </li>
+                    {% endfor %}
                     <span class="rssatom">
                         <a href="{{ url('comment_rss') }}"><span><i class="fa fa-rss"></i></span> RSS</a>
                         /
@@ -205,9 +228,10 @@
                 </div>
             </div>
             <div class="blog-sidebox sidebox">
-                <h3>{{ _('New problems') }} <i class="fa fa-puzzle-piece"></i>
-                </h3>
-                <div class="sidebox-content">
+                <h2 class="ui dividing header" style="border-radius:0;">
+                    <i class="fa fa-puzzle-piece"></i> {{ _('New problems') }}
+                </h2>
+                <div class="ui segment">
                     <ul class="problem-list">
                         {% for problem in new_problems %}
                             <li><a href="{{ url('problem_detail', problem.code) }}">{{ problem.name }}</a></li>
@@ -222,8 +246,10 @@
             </div>
             {% if perms.judge.test_site and own_open_tickets %}
                 <div class="blog-sidebox sidebox">
-                    <h3>{{ _('My open tickets') }} <i class="fa fa-question-circle"></i></h3>
-                    <div class="sidebox-content">
+                    <h2 class="ui dividing header" style="border-radius:0;">
+                        <i class="fa fa-question-circle"></i> {{ _('My open tickets') }}
+                    </h2>
+                    <div class="ui segment">
                         <ul class="own-open-tickets">
                             {% for ticket in own_open_tickets %}
                                 <li>
@@ -243,8 +269,10 @@
 
             {% if perms.judge.test_site and open_tickets %}
                 <div class="blog-sidebox sidebox">
-                    <h3>{{ _('New tickets') }} <i class="fa fa-exclamation-circle"></i></h3>
-                    <div class="sidebox-content">
+                    <h2 class="ui dividing header" style="border-radius:0;">
+                        <i class="fa fa-exclamation-circle"></i> {{ _('New tickets') }}
+                    </h2>
+                    <div class="ui segment">
                         <ul class="open-tickets">
                             {% for ticket in open_tickets %}
                                 <li>
