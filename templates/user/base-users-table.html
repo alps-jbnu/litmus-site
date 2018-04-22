@@ -16,8 +16,14 @@
 
 <tbody>
 {% for rank, user in users %}
-    <tr id="user-{{ user.user.username }}">
-        <td>{{ rank }}</td>
+    <tr id="user-{{ user.user.username }}" {% if user.user == request.user %}class="me"{% endif %}>
+        <td>
+            {% if user.user == request.user %}
+                <div class="ui red ribbon label">{{ rank }}</div>
+            {% else %}
+                {{ rank }}
+            {% endif %}
+        </td>
         {% block after_rank scoped %}{% endblock %}
         <td class="user-name">
             {% if perms.judge.change_organization %}
