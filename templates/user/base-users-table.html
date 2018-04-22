@@ -22,7 +22,9 @@
         <td class="user-name">
             {% if perms.judge.change_organization %}
                 <a href="{{ url('user_page', user.user.username) }}">
-                    {{ user.user.username }}&nbsp;({{ user.user.profile.display_name }} / {{ user.user.profile.student_id }})
+                    {{ user.user.username }}
+                    <br>
+                    ({{ user.user.profile.display_name }} / {{ user.user.profile.student_id }})
                 </a>
             {% else %}
                 {{ link_user(user) }}
