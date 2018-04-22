@@ -43,16 +43,19 @@
 
         .full-score, .full-score a {
             font-weight: bold;
-            color: green;
+            color: white;
+            background-color: #52d889;
         }
 
         .partial-score, .partial-score a {
-            color: green;
+            color: #A17917;
+            background-color: #FFB94E;
         }
 
         .failed-score, .failed-score a {
             font-weight: bold;
-            color: red;
+            color: white;
+            background-color: #E68364;
         }
 
         .pretest-full-score, .pretest-full-score a {
@@ -73,9 +76,19 @@
             font-weight: bold;
             color: black;
         }
+        .user-points .solving-time {
+            color: #999999;
+        }
+
+        .full-score .solving-time,
+        .partial-score .solving-time,
+        .failed-score .solving-time {
+            color: rgba(255, 255, 255, .7);
+        }
+
 
         .solving-time {
-            color: gray;
+            color: #999999;
             font-weight: normal;
             font-size: 0.75em;
             padding-bottom: -0.75em;
@@ -227,5 +240,35 @@
         <input id="show-organizations-checkbox" type="checkbox" style="vertical-align: bottom">
         <label for="show-organizations-checkbox" style="vertical-align: bottom">{{ _('Show organizations') }}</label>
     </div>
+
+    <a id="help-scoring" class="ui blue icon button">
+        <i class="fa fa-fw fa-question-circle"></i>
+        순위 계산
+    </a>
+
     {% include "contest/ranking-table.html" %}
+
+    <div class="ui tiny modal" id="scoring">
+        <i class="close icon"></i>
+        <div class="header">
+            순위 계산 공식
+        </div>
+        <div class="content">
+            <div class="description">
+                <div class="ui header">ACM-ICPC <a href="https://icpc.baylor.edu/regionals/rules#HScoringofaRegionalContest" target="_blank">Rule</a>을 따릅니다.</div>
+                <p>해결한 문제가 많고 패널티가 적을수록 순위가 높습니다!</p>
+                <p>맞을 때 까지 시도한 제출 중 오답은 <b>20분의 패널티</b>를 가지므로 주의하세요.</p>
+                <p>예를 들어, A번 문제를 3번 틀리고 대회 시작 후 7분에 맞추었다면<br>패널티는 <span class="ui basic label">3회 * 20 = 60분 + 7분 = 67분</span>입니다.</p>
+                <p>맞추지 못한 문제의 패널티는 반영되지 않습니다.</p>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui positive right labeled icon button">
+                알겠습니다
+                <i class="checkmark icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">$(document).ready(function(){$('#scoring').modal('attach events', '#help-scoring', 'show');});</script>
 {% endblock %}
