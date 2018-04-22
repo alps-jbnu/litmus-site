@@ -9,24 +9,32 @@
 
 {% block user_content %}
     <div class="content-description">
-        {% if user.about %}
-            <h4>{{ _('About') }}</h4>
+        {% if is_admin or request.user.is_superuser or perms.judge.change_organization %}
+            <h4>정보</h4>
             <br>
             <blockquote>
+                <p>이름: {{ user.user.profile.display_name }}</p>
+                <p>학번: {{ user.user.profile.student_id }}</p>
+            </blockquote>            
+        {% endif %}
+
+        <h4>{{ _('About') }}</h4>
+        <br>
+        <blockquote>
+            {% if user.about %}
                 {% cache 86400 'user_about' user.id %}
                     {{ user.about|safe }}
                 {% endcache %}
-            </blockquote>
-        {% else %}
-            <i>
-                {% if user.user == request.user %}
-                    {{ _('You have not shared any information.') }}
-                {% else %}
-                    {{ _('This user has not shared any information.') }}
-                {% endif %}
-            </i>
-            <br>
-        {% endif %}
+            {% else %}
+                <i>
+                    {% if user.user == request.user %}
+                        {{ _('You have not shared any information.') }}
+                    {% else %}
+                        {{ _('This user has not shared any information.') }}
+                    {% endif %}
+                </i>
+            {% endif %}
+        </blockquote>
 
         {% if rating %}
             <h4>Rating History</h4>

@@ -19,7 +19,15 @@
     <tr id="user-{{ user.user.username }}">
         <td>{{ rank }}</td>
         {% block after_rank scoped %}{% endblock %}
-        <td class="user-name">{{ link_user(user) }}</td>
+        <td class="user-name">
+            {% if perms.judge.change_organization %}
+                <a href="{{ url('user_page', user.user.username) }}">
+                    {{ user.user.username }}&nbsp;({{ user.user.profile.display_name }} / {{ user.user.profile.student_id }})
+                </a>
+            {% else %}
+                {{ link_user(user) }}
+            {% endif %}
+        </td>
         {% block before_point scoped %}{% endblock %}
         {% block point scoped %}
             <td title="{{ user.performance_points|floatformat(2) }}" class="user-points">
