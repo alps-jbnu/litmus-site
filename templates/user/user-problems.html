@@ -33,7 +33,7 @@
 {% block user_content %}
     {% if pp_breakdown %}
         <h3 class="pp-breakdown-header">{{ _('Points Breakdown') }}</h3>
-        <table id="submissions-table" class="pp-table table">
+        <table id="submissions-table" class="pp-table ui table">
             <colgroup>
                 <col class="sub-result">
                 <col class="sub-info">
@@ -55,7 +55,7 @@
             <h3 class="unselectable toggle closed">
                 <span class="fa fa-chevron-right fa-fw"></span>{{ _('Authored Problems') }} ({{ authored|length }})
             </h3>
-            <table style="display: none" class="table toggled">
+            <table style="display: none" class="ui table toggled">
                 <thead>
                 <tr>
                     <th>{{ _('Problem') }}</th>
@@ -97,7 +97,7 @@
             <h3 class="unselectable toggle closed"><span class="fa fa-chevron-right fa-fw"></span>
                 {{ group.name }} ({{ _('%(points).1f points', points=group.points) }})
             </h3>
-            <table style="display: none" class="table toggled">
+            <table style="display: none" class="ui table toggled">
                 <thead>
                 <tr>
                     <th>{{ _('Problem') }}</th>
