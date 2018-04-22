@@ -10,13 +10,12 @@
 
 {% block header %}
     {% if perms.judge.change_blogpost %}
-        <div class="title-line-action">[<a href="{{ url('admin:judge_blogpost_change', post.id) }}">{{ _('Edit') }}</a>]
-        </div>
+        <a class="ui label" href="{{ url('admin:judge_blogpost_change', post.id) }}">{{ _('Edit') }}</a>
     {% endif %}
 {% endblock %}
 
 {% block body %}
-    <div class="post-full">
+    <div class="ui stacked segment">
         <div class="time">
             {% with authors=post.authors.all() %}
                 {% if authors %}
@@ -29,13 +28,13 @@
                 {% endtrans %}
             </span>
         </div>
+        <div class="ui divider"></div>
         <div class="body content-description">
-            {% cache 86400 'post_content' post.id %}
+            {% cache 60 'post_content' post.id %}
                 {{ post.content|safe }}
             {% endcache %}
         </div>
     </div>
-    <hr>
     <span class="social">
         {{ post_to_gplus(request, post, '<i class="fa fa-google-plus-square"></i>') }}
         {{ post_to_facebook(request, post, '<i class="fa fa-facebook-official"></i>') }}
