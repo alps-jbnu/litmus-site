@@ -38,14 +38,12 @@
 {% endblock %}
 
 {% block body %}
-    <div class="ui vertical segment" style="max-width: 480px; margin:0 auto;">
+    <div class="ui vertical segment" style="max-width: 480px; margin:0 auto; padding: 5em 0;border:0">
         <form class="ui large login form" method="POST">
           {% csrf_token %}
-          {% if form.errors %}
-              <div class="ui red message">
-                  <p>{{ _('Invalid username or password.') }}</p>
-              </div>
-          {% endif %}
+          <div class="ui error message" {% if form.errors %} style="display: block;" {% endif %}>
+            <p>{{ _('Invalid username or password.') }}</p>
+          </div>
           <div class="ui stacked segment">
             <div class="field">
               <div class="ui left icon input">
@@ -62,8 +60,6 @@
             <div class="ui fluid large teal submit button">{{ _('Login!') }}</div>
             <input type="hidden" name="next" value="{{ next }}">
           </div>
-
-          <div class="ui error message"></div>
 
           <a href="{{ url('password_reset') }}">{{ _('Forgot your password?') }}</a>
 
@@ -92,5 +88,5 @@
         {% endif %}
         </form>
     </div>
-    <script>$(document).ready(function(){$(".login.form").form({});});</script>
+    <script>$(document).ready(function(){$(".login.form").form({fields: {username : 'empty',password : 'empty'}});});</script>
 {% endblock %}
