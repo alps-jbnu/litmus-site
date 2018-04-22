@@ -357,14 +357,14 @@
 
 {% block body %}
     {% if data_form.instance.feedback %}
-        <ul class="errorlist">
-            <li>{{ data_form.instance.feedback }}</li>
-        </ul>
+        <div class="ui red message">
+            <p>{{ data_form.instance.feedback }}</p>
+        </div>
     {% endif %}
-    <form action="" method="POST" enctype="multipart/form-data">
+    <form action="" method="POST" enctype="multipart/form-data" class="ui form">
         {% csrf_token %}
         {{ cases_formset.management_form }}
-        <table class="table">{{ data_form.as_table() }}</table>
+        <table class="ui padded celled table">{{ data_form.as_table() }}</table>
         <div id="column-visible" data-problem="{{ problem.code }}">
             <strong>{{ _('Show columns:') }}</strong>
             <label>
@@ -384,7 +384,7 @@
                 {{ _('Generator args') }}
             </label>
         </div>
-        <table id="case-table" class="table">
+        <table id="case-table" class="ui padded striped celled table">
             <thead>
             <tr>
                 <th class="order-column"></th>
@@ -444,8 +444,8 @@
             {% endfor %}
             </tbody>
         </table>
-        <input type="submit" value="{{ _('Submit!') }}" class="button">
-        <a id="add-case-row" href="#"><i class="fa fa-plus"></i> {{ _('Add new case') }}</a>
+        <button type="submit" class="ui primary button">{{ _('Submit!') }}</button>
+        <a id="add-case-row" href="#" class="ui icon teal button"><i class="fa fa-plus"></i> {{ _('Add new case') }}</a>
     </form>
     <div style="display: none" class="generator-args-editor"><textarea></textarea><a class="button">Save</a></div>
 {% endblock %}
