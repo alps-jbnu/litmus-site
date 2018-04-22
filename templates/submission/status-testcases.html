@@ -15,9 +15,12 @@
         <pre>{{ submission.error|safe }}</pre>
     {% else %}
         {% if submission.error %}
-            <h3>{{ _('Compilation Warnings') }}</h3>
-            <pre>{{ submission.error|safe }}</pre>
-            <hr class="half-hr"><br>
+            <h3>{{ _('Compilation Warnings') }} <small><a href="javascript:void(0)" id="show-error">보기</a></small></h3>
+            <div id="compile-msg" style="display: none;">
+                <pre style="background-color: #efefef;padding:2em 1em;">{{ submission.error|safe }}</pre>
+                <div class="ui divider"></div>
+            </div>
+            <script>$(document).ready(function(){$("#show-error").click(function(){$("#compile-msg").toggle();});});</script>
         {% endif %}
         {% if is_pretest %}
             <h3>{{ _('Pretest Execution Results') }}</h3>
