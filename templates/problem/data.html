@@ -202,6 +202,7 @@
                 $total.val(parseInt($total.val()) + 1);
                 $table.trigger('add-row', [$tr]);
                 window.scrollBy(0, $tr.height());
+                window.scrollTo(0,document.body.scrollHeight);
                 return false;
             });
 
