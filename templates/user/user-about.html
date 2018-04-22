@@ -9,12 +9,13 @@
 
 {% block user_content %}
     <div class="content-description">
-        {% if is_admin or request.user.is_superuser or perms.judge.change_organization %}
-            <h4>정보</h4>
+        {% if request.user == user.user or is_admin or request.user.is_superuser or perms.judge.change_organization %}
+            <h4>{{ user.user.username }}의 정보</h4>
             <br>
             <blockquote>
                 <p>이름: {{ user.user.profile.display_name }}</p>
                 <p>학번: {{ user.user.profile.student_id }}</p>
+                <p>메일: <a href="matilto:{{ user.user.email }}">{{ user.user.email }}</a></p>
             </blockquote>            
         {% endif %}
 
