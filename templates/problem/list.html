@@ -223,24 +223,29 @@
                     {% if problem.id in completed_problem_ids %}
                         <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                             {% if problem.is_public or request.in_contest %}
-                                <i class="solved-problem-color fa fa-check-circle"></i>
+                                <div class="ui green small label">해결</div>
                             {% else %}
-                                <i class="solved-problem-color fa fa-lock"></i>
+                                <div class="ui green small icon label">
+                                    <i class="fa fa-lock"></i> 성공
+                                </div>
                             {% endif %}
                         </a>
                     {% elif problem.id in attempted_problems %}
                         <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
                             {% if problem.is_public or request.in_contest %}
-                                <i class="attempted-problem-color fa fa-minus-circle"></i>
+                                <div class="ui red small label">실패</div>
                             {% else %}
-                                <i class="attempted-problem-color fa fa-lock"></i>
+                                <div class="ui red small icon label">
+                                    <i class="fa fa-lock"></i> 실패
+                                </div>
                             {% endif %}
                         </a>
                     {% else %}
                         {% if problem.is_public or request.in_contest %}
-                            <i class="unsolved-problem-color fa fa-minus-circle"></i>
                         {% else %}
-                            <i class="unsolved-problem-color fa fa-lock"></i>
+                            <div class="ui small icon label">
+                                <i class="fa fa-lock"></i>
+                            </div>
                         {% endif %}
                     {% endif %}
 
