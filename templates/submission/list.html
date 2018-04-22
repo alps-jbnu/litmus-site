@@ -163,8 +163,7 @@
                         return;
                     }
                     console.log('You probably should refresh?');
-                    $('#ws-closed').show();
-                    $('#ws-closed').click(function () {
+                    $('#ws-closed').show().find('.message').click(function () {
                         window.location.reload();
                     });
                 };
@@ -223,9 +222,11 @@
                 </div>
             {% endif %}
 
-            <a href="javascript:void(0)" id="ws-closed" class="ui red message" style="display:block;">
-                {{ _('You were disconnected. Refresh to show latest updates.') }}
-            </a>
+            <div id="ws-closed" style="display: none;"> 
+                <a href="javascript:void(0)" class="ui red message" style="display:block;">
+                    {{ _('You were disconnected. Refresh to show latest updates.') }}
+                </a>
+            </div>
 
             <table id="submissions-table" class="ui celled compact striped table">
                 <colgroup>
