@@ -9,22 +9,14 @@
 
 {% block user_content %}
     <div class="content-description">
-        {% with orgs=user.organizations.all() %}
-            {% if orgs %}
-                <p style="margin-top: 0"><b>{{ _('From') }}</b>
-                    {% for org in orgs -%}
-                        <a href="{{ url('organization_home', org.key) }}">{{ org.name }}</a>
-                        {%- if not loop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-            {% endif %}
-        {% endwith %}
-
         {% if user.about %}
             <h4>{{ _('About') }}</h4>
-            {% cache 86400 'user_about' user.id %}
-                {{ user.about|safe }}
-            {% endcache %}
+            <br>
+            <blockquote>
+                {% cache 86400 'user_about' user.id %}
+                    {{ user.about|safe }}
+                {% endcache %}
+            </blockquote>
         {% else %}
             <i>
                 {% if user.user == request.user %}
@@ -50,6 +42,18 @@
                 </div>
             </div>
         {% endif %}
+
+        {% with orgs=user.organizations.all() %}
+            {% if orgs %}
+                <h4>참여 소속</h4>
+                <p style="margin-top: 0;">
+                    {% for org in orgs -%}
+                        <a class="ui basic label" style="margin-top: 5px;" href="{{ url('organization_home', org.key) }}">{{ org.name }}</a>
+                        {%- if not loop.last %}&nbsp; {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+        {% endwith %}
     </div>
 {% endblock %}
 
