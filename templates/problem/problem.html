@@ -2,14 +2,6 @@
 {% block content_media %}
     {% include "comments/media-css.html" %}
     <style>
-        .title-state {
-            font-size: 2em;
-            float: left;
-            width: 1.1em;
-            display: block;
-            margin-top: 0.16em;
-        }
-
         .info-float a {
             vertical-align: middle;
         }
@@ -45,27 +37,43 @@
 {% endblock %}
 
 {% block title_row %}
-    <div class="problem-title">
-        {% if request.user.is_authenticated %}
-            {% if problem.id in completed_problem_ids %}
-                <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
-                    {% if problem.is_public or request.in_contest %}
-                        <i class="solved-problem-color title-state fa fa-check-circle"></i>
+    <div class="">
+        <h1 class="ui huge header">
+            {{ title }}
+            <small>
+                {% if request.user.is_authenticated %}
+                    {% if problem.id in completed_problem_ids %}
+                        <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                            {% if problem.is_public or request.in_contest %}
+                                <div class="ui green small label">해결</div>
+                            {% else %}
+                                <div class="ui green small icon label">
+                                    <i class="fa fa-lock"></i> 성공
+                                </div>
+                            {% endif %}
+                        </a>
+                    {% elif problem.id in attempted_problems %}
+                        <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
+                            {% if problem.is_public or request.in_contest %}
+                                <div class="ui red small label">실패</div>
+                            {% else %}
+                                <div class="ui red small icon label">
+                                    <i class="fa fa-lock"></i> 실패
+                                </div>
+                            {% endif %}
+                        </a>
                     {% else %}
-                        <i class="solved-problem-color title-state fa fa-lock"></i>
+                        {% if problem.is_public or request.in_contest %}
+                        {% else %}
+                            <div class="ui small label">
+                                <i class="fa fa-lock"></i>
+                            </div>
+                        {% endif %}
                     {% endif %}
-                </a>
-            {% elif problem.id in attempted_problems %}
-                <a href="{{ url('user_submissions', problem.code, request.user.username) }}">
-                    {% if problem.is_public or request.in_contest %}
-                        <i class="attempted-problem-color title-state fa fa-minus-circle"></i>
-                    {% else %}
-                        <i class="attempted-problem-color title-state fa fa-lock"></i>
-                    {% endif %}
-                </a>
-            {% endif %}
-        {% endif %}
-        <h1 class="ui huge header">{{ title }}</h1>
+                {% endif %}
+            </small>
+        </h1>
+
         {% if has_pdf_render %}
             <span class="spacer"></span>
             <a href="{{ url('problem_pdf', problem.code) }}" class="view-pdf">
