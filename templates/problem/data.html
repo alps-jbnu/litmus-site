@@ -106,6 +106,14 @@
                 handle_table_reorder();
             }
 
+            function sync_generator_args () {
+                $(".edit-generator-args").parent().find('input').each(function(e, i){
+                    $(i).parent().find('.preview-generator-args').html($(i).val() || '&nbsp;');
+                });
+            }
+
+            sync_generator_args();
+
             checker_precision($('#id_problem-data-checker'));
 
             $table.on('add-row', function (e, $tr) {
@@ -144,7 +152,9 @@
                         case 'C':
                         case 'S':
                             var $this = $(this).addClass(tooltip_classes);
-                            $this.attr('aria-label', $this.prev().val() || '(none)');
+                            var content = $this.prev().val() || '(none)';
+                            $this.attr('aria-label', content);
+                            $this.find('preview-generator-args').html(content);
                     }
                 }).mouseout(function () {
                     $(this).removeClass(tooltip_classes).removeAttr('aria-label');
@@ -164,6 +174,7 @@
                             .find('textarea').val($input.val()).end()
                             .find('.button').click(function () {
                             $input.val($(this).prev().val());
+                            sync_generator_args();
                             $.featherlight.current().close();
                         }).end()
                             .show();
@@ -446,6 +457,7 @@
                     </td>
                     <td class="generator-args">{{ form.generator_args.errors }}{{ form.generator_args }}
                         <a href="javascript:void(0)" class="edit-generator-args">
+                            <pre class="preview-generator-args" style="background-color: #f3f3f3; padding: 2px 4px; margin:0;"></pre>
                             <i class="fa fa-pencil"></i>
                             {{ _('Edit') }}
                         </a>
