@@ -114,6 +114,16 @@
 
             sync_generator_args();
 
+            function random_generator_args () {
+                $(".edit-generator-args").parent().find('input').each(function(e, i){
+                    $(i).val(Math.floor(Math.random() * 1000)); 
+                });
+                sync_generator_args();
+                return false;
+            }
+
+            $("a#random-generator-args").click(random_generator_args);
+
             checker_precision($('#id_problem-data-checker'));
 
             $table.on('add-row', function (e, $tr) {
@@ -472,6 +482,7 @@
         <button type="submit" class="ui primary button">{{ _('Submit!') }}</button>
         <a id="add-case-row" href="#" class="ui icon teal button"><i class="fa fa-plus"></i> {{ _('Add new case') }}</a>
         <a id="remove-case-all" href="#" class="ui icon red button"><i class="fa fa-trash"></i> {{ _('Remove all cases') }}</a>
+        <a id="random-generator-args" href="#" class="ui icon teal generator-args button"><i class="fa fa-spin"></i> {{ _('Randomize') }}</a>
     </form>
     <div style="display: none" class="generator-args-editor"><textarea></textarea><a class="button">Save</a></div>
 {% endblock %}
