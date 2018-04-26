@@ -228,8 +228,8 @@
             }
 
             $('a#remove-case-all').click(function () {
-                var rows = $table.find('tr').length;
-                for(var i=0; i<rows-1; i+=1){
+                var rows = $total.val() || 0;
+                for(var i=0; i < rows; i+=1){
                     $('#id_cases-' + i + '-DELETE').prop('checked', true);
                 }
                 return false;
