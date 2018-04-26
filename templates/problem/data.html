@@ -194,7 +194,7 @@
 
             var $total = $('#id_cases-TOTAL_FORMS');
 
-            $('a#add-case-row').click(function () {
+            function add_row(case_id) {
                 var $tr;
                 $table.find('tbody:first').append($tr = $($table.find('.extra-row-body').html()
                     .replace(/__prefix__/g, $total.val())));
@@ -204,6 +204,18 @@
                 window.scrollBy(0, $tr.height());
                 window.scrollTo(0,document.body.scrollHeight);
                 return false;
+            }
+
+            $('a#remove-case-all').click(function () {
+                var rows = $table.find('tr').length;
+                for(var i=0; i<rows-1; i+=1){
+                    $('#id_cases-' + i + '-DELETE').prop('checked', true);
+                }
+                return false;
+            });
+
+            $('a#add-case-row').click(function () {
+                return add_row();
             });
 
             var oldIndex;
@@ -447,6 +459,7 @@
         </table>
         <button type="submit" class="ui primary button">{{ _('Submit!') }}</button>
         <a id="add-case-row" href="#" class="ui icon teal button"><i class="fa fa-plus"></i> {{ _('Add new case') }}</a>
+        <a id="remove-case-all" href="#" class="ui icon red button"><i class="fa fa-trash"></i> {{ _('Remove all cases') }}</a>
     </form>
     <div style="display: none" class="generator-args-editor"><textarea></textarea><a class="button">Save</a></div>
 {% endblock %}
