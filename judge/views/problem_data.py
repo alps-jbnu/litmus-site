@@ -65,7 +65,7 @@ class ProblemCaseForm(ModelForm):
         widgets = {
             'generator_args': HiddenInput,
             'type': Select(attrs={'style': 'width: 100%'}),
-            'points': NumberInput(attrs={'style': 'width: 4em'}),
+            'points': NumberInput(attrs={'style': 'width: 4em', 'value': '5'}),
             'output_prefix': NumberInput(attrs={'style': 'width: 4.5em'}),
             'output_limit': NumberInput(attrs={'style': 'width: 6em'}),
             'checker_args': HiddenInput,
