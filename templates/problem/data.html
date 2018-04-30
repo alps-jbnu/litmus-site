@@ -215,7 +215,7 @@
 
             var $total = $('#id_cases-TOTAL_FORMS');
 
-            function add_row(case_id) {
+            function add_row() {
                 var $tr;
                 $table.find('tbody:first').append($tr = $($table.find('.extra-row-body').html()
                     .replace(/__prefix__/g, $total.val())));
@@ -290,6 +290,23 @@
                 }
                 $this.prop('checked', filled).trigger('change');
             });
+
+            function fill_auto() {
+                window.valid_files.forEach(function(e, i){
+                    if( e.search(/in/i) != -1 && e.search(/[0-9]+/) != -1 ){
+                        var n = parseInt(e.replace(/[^0-9]/g, '')) - 1;
+                        if( n >= $total.val() ) add_row();
+                        $("#id_cases-" + n +"-output_file").val('').trigger('change');
+                        $("#id_cases-" + n +"-input_file").val(e).trigger('change');
+                    }
+                });
+                $(".auto-fill.message").show().fadeOut(3000);
+                return false;
+            }
+
+            // fill data automatically
+            $("a#fill-auto").click(fill_auto);
+            if( $total.val() == 1 && ! $("#id_cases-0-input_file").val() ) fill_auto();
         });
     </script>
 {% endblock %}
@@ -418,6 +435,7 @@
                 {{ _('Generator args') }}
             </label>
         </div>
+        <div class="ui success auto-fill message">테스트 케이스를 자동으로 설정하였습니다!</div>
         <table id="case-table" class="ui padded striped celled table">
             <thead>
             <tr>
@@ -479,10 +497,12 @@
             {% endfor %}
             </tbody>
         </table>
+        <div class="ui success auto-fill message">테스트 케이스를 자동으로 설정하였습니다!</div>
         <button type="submit" class="ui primary button">{{ _('Submit!') }}</button>
         <a id="add-case-row" href="#" class="ui icon teal button"><i class="fa fa-plus"></i> {{ _('Add new case') }}</a>
         <a id="remove-case-all" href="#" class="ui icon red button"><i class="fa fa-trash"></i> {{ _('Remove all cases') }}</a>
-        <a id="random-generator-args" href="#" class="ui icon teal generator-args button"><i class="fa fa-spin"></i> {{ _('Randomize') }}</a>
+        <a id="random-generator-args" href="#" class="ui icon teal generator-args button"><i class="random icon"></i> {{ _('Randomize') }}</a>
+        <a id="fill-auto" href="#" class="ui icon teal generator-args button"><i class="sort amount down icon"></i> {{ _('Fill Auto') }}</a>
     </form>
     <div style="display: none" class="generator-args-editor"><textarea></textarea><a class="button">Save</a></div>
 {% endblock %}
