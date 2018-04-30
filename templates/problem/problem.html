@@ -232,25 +232,20 @@
             </td>
             <td>
                 {{ problem.time_limit }}초
-                <span class="problem-lang-limits">
+                <div class="problem-lang-limits">
                 {% for name, limit in problem.language_time_limit %}
-                    <div class="ui image label">
-                        {{ name }}
-                        <div class="detail">{{ limit }}초</div>
-                    </div>
+                    ({{ name }}) {{ limit }}초<br>
                 {% endfor %}
-                </span>
+                </div>
             </td>
             <div class="detail">
             <td>
                 {{ problem.memory_limit|kbsimpleformat }}
-                <span class="problem-lang-limits">
+                <div class="problem-lang-limits">
                 {% for name, limit in problem.language_memory_limit %}
-                    <div class="ui image label">
-                        {{ name }}
-                        <div class="detail">{{ limit|kbsimpleformat }}</div>
-                    </div>
+                    ({{ name }}) {{ limit|kbsimpleformat }}<br>
                 {% endfor %}
+                </div>
             </td>
         </tr>
         </tbody>
