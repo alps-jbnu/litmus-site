@@ -244,21 +244,21 @@
                     </span>
                 </div>
             </div>
-            {% if perms.judge.test_site and own_open_tickets %}
+            {% if own_open_tickets %}
                 <div class="blog-sidebox sidebox">
                     <h2 class="ui dividing header" style="border-radius:0;">
-                        <i class="fa fa-question-circle"></i> {{ _('My open tickets') }}
+                        <i class="fa fa-question-circle"></i> 내 질문 현황
                     </h2>
                     <div class="ui segment">
                         <ul class="own-open-tickets">
                             {% for ticket in own_open_tickets %}
                                 <li>
                                     <div class="title">
-                                        <a href="{{ url('ticket', ticket.id) }}">{{ ticket.title }}</a>
-                                    </div>
-                                    <div class="object">
                                         <a href="{{ ticket.linked_item.get_absolute_url() }}">
                                             {{ ticket.linked_item|item_title }}</a>
+                                    </div>
+                                    <div class="object">
+                                        <a href="{{ url('ticket', ticket.id) }}">{{ ticket.title }}</a>
                                     </div>
                                 </li>
                             {% endfor %}
@@ -277,11 +277,11 @@
                             {% for ticket in open_tickets %}
                                 <li>
                                     <div class="title">
-                                        <a href="{{ url('ticket', ticket.id) }}">{{ ticket.title }}</a>
-                                    </div>
-                                    <div class="object">
                                         <a href="{{ ticket.linked_item.get_absolute_url() }}">
                                             {{ ticket.linked_item|item_title }}</a>
+                                    </div>
+                                    <div class="object">
+                                        <a href="{{ url('ticket', ticket.id) }}">{{ ticket.title }}</a>
                                     </div>
                                     <div>{{ link_user(ticket.user) }}</div>
                                 </li>
