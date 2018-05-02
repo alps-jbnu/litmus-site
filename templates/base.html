@@ -152,6 +152,43 @@
                 id: '{{ request.user.idjs }}',
                 name: '{{ request.user.username|escapejs }}'
             };
+
+            $(document).ready(function(){
+                function show_notifications(){
+                    var box = $("#notifications");
+                    $.getJSON( "/notifications/json/", {'unread': 1})
+                      .done(function( result ) {
+                        result.forEach(function(e){
+                          var el = $('#noti-' + e.id);
+                          if( ! el.length ){
+                            var csrftok = "{% csrf_token %}";
+                            var fhtml = '<form action="{{ url('notification_read') }}" method="POST">' + csrftok + '<input type="hidden" name="id" value="'+ e.id +'"/></form>';
+                            box.html('<div class="item notification" id="noti-' + e.id +'"><i class="close icon" data-id="'+ e.id +'"></i> ' + e.body + fhtml + '</div>' + box.html());
+                            $('#noti-' + e.id).transition('fly down');
+                          }
+                        });
+
+                        $('.notification.item').find('.close').click(function(evt){
+                          evt.stopPropagation();
+                          evt.preventDefault();
+                          var noti_id = $(this).data('id');
+                          $(this).off(evt);
+                          $(this).parent().transition('vertical flip').remove();
+                          $.ajax({
+                            type: "POST",
+                            url: "/notifications/read/",
+                            data: $(this).parent().find('form').serialize(),
+                            success: function(data){
+                            }
+                          });
+                        });
+                    })
+                  ;
+                }
+
+                show_notifications();
+                setInterval(show_notifications, 5000);
+            });
         </script>
     {% else %}
         <script>window.user = {};</script>
@@ -177,8 +214,37 @@
             }
         </style>
     </noscript>
+
+    <style>
+        #notifications {
+            display: block;
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            max-width: 400px;
+            width: 100%;
+            padding-bottom: 1em;
+            z-index: 999;
+        }
+        #notifications .item {
+            display: none;
+            margin: 0.5em;
+            padding: 1em;
+            border: 1px solid #7169b5;
+            border-radius: 5px;
+            background-color: #d9e5f3ba;
+            box-shadow: 0px 5px 7px rgba(0,0,0,.1);
+        }
+        #notifications .item .icon.close {
+            margin-right: 0;
+            line-height: 1.3em;
+        }
+    </style>
 </head>
 <body class="pushable">
+
+<!-- Notifications -->
+<div id="notifications"></div>
 
 <!-- Sidebar for mobile -->
 <div class="ui left vertical inverted sidebar labeled icon menu uncover">

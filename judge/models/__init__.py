@@ -13,6 +13,7 @@ from judge.models.profile import Profile, Organization, OrganizationRequest
 from judge.models.runtime import Language, RuntimeVersion, Judge
 from judge.models.submission import SUBMISSION_RESULT, Submission, SubmissionTestCase
 from judge.models.ticket import Ticket, TicketMessage
+from judge.models.notification import Notification
 
 revisions.register(Profile, exclude=['points', 'last_access', 'ip', 'rating'])
 revisions.register(Problem, follow=['language_limits'])
@@ -25,4 +26,5 @@ revisions.register(Solution)
 revisions.register(Judge, fields=['name', 'created', 'auth_key', 'description'])
 revisions.register(Language)
 revisions.register(Comment, fields=['author', 'time', 'page', 'score', 'title', 'body', 'hidden', 'parent'])
+revisions.register(Notification)
 del revisions
