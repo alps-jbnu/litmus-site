@@ -325,6 +325,7 @@ urlpatterns = [
     ])),
 
     url(r'^notifications/', include([
+        url(r'^send/$', notification.send_notification, name='notification_send'),
         url(r'^json/$', notification.get_list_json, name='notification_list'),
         url(r'^read/$', notification.read_notification, name='notification_read'),
     ])),

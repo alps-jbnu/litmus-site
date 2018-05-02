@@ -163,7 +163,8 @@
                           if( ! el.length ){
                             var csrftok = "{% csrf_token %}";
                             var fhtml = '<form action="{{ url('notification_read') }}" method="POST">' + csrftok + '<input type="hidden" name="id" value="'+ e.id +'"/></form>';
-                            box.html('<div class="item notification" id="noti-' + e.id +'"><i class="close icon" data-id="'+ e.id +'"></i> ' + e.body + fhtml + '</div>' + box.html());
+                            var cls = e.style || '';
+                            box.html('<div class="item notification ' + cls + '" id="noti-' + e.id +'"><i class="close icon" data-id="'+ e.id +'"></i> ' + e.body + fhtml + '</div>' + box.html());
                             $('#noti-' + e.id).transition('fly down');
                           }
                         });
@@ -224,21 +225,25 @@
             max-width: 400px;
             width: 100%;
             padding-bottom: 1em;
-            z-index: 999;
+            z-index: 10;
         }
         #notifications .item {
             display: none;
             margin: 0.5em;
             padding: 1em;
-            border: 1px solid #7169b5;
-            border-radius: 5px;
-            background-color: #d9e5f3ba;
-            box-shadow: 0px 5px 7px rgba(0,0,0,.1);
+            border: 1px solid #4a90d2;
+            border-radius: 1px;
+            background-color: #5397d2;
+            color: white;
+            box-shadow: 0px 3px 8px #5397d27d;
         }
-        #notifications .item .icon.close {
-            margin-right: 0;
-            line-height: 1.3em;
-        }
+        #notifications .item.danger { background-color: #de635f; border-color: #cc514d; box-shadow: 0 3px 8px #de635f7d; }
+        #notifications .item.warning { background-color: #f2b957; border-color: #e4ac4b; box-shadow: 0 3px 8px #f2b9577d; }
+        #notifications .item.success { background-color: #6bc267; border-color: #59b155; box-shadow: 0 3px 8px #6bc2677d; }
+        #notifications .item.dark { background-color: #595959; border-color: #424242; box-shadow: 0 3px 8px #5959597d; }
+        #notifications .item p { margin: 0 0 .3em; }
+        #notifications .item a { color: #eee; border-bottom: 1px dotted rgba(255,255,255,.75); }
+        #notifications .item .icon.close { color: white; margin-right: 0; line-height: 1.3em; }
     </style>
 </head>
 <body class="pushable">
@@ -288,6 +293,12 @@
                 {% endif %}
             {% endwith %}
         {% endfor %}
+
+        {% if request.user.has_perm('judge.send_notification') %}
+            <a href="{{ url('notification_send') }}" class="nav-notification mobile hidden item">
+                알림 전송
+            </a>
+        {% endif %}
 
         <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}

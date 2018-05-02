@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    {% compress js %}
+        {# form.media.js #}
+        <script>
+        $(document).ready(function(){
+            $(".users.dropdown").dropdown();
+        });
+        </script>
+    {% endcompress %}
+{% endblock %}
+
+{% block media %}
+    {% compress css %}
+        {# form.media.css #}
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+    <form id="notification_submit" action="" method="post" class="ui form">
+        {% csrf_token %}
+        {{ form.non_field_errors() }}
+        <div class="field">
+            <label>사용자별로 전송하기</label>
+            <select class="ui fluid search users dropdown" multiple="" name="profiles">
+                <option value="">---</option>
+                {% for profile in users %}
+                    <option value="{{ profile.user.username }}">{{ profile.user.username }} ({{ profile.display_name }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>대회별로 전송하기 <small>현재 진행중인 대회만 표시됩니다.</small></label>
+            <select class="ui fluid search users dropdown" multiple="" name="contests">
+                <option value="">---</option>
+                {% for contest in contests %}
+                    <option value="{{ contest.key }}">{{ contest.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>소속별로 전송하기</label>
+            <select class="ui fluid search users dropdown" multiple="" name="organizations">
+                <option value="">---</option>
+                {% for org in organizations %}
+                    <option value="{{ org.key }}">{{ org.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>알림 스타일</label>
+            <select class="ui fluid search dropdown" name="style">
+                <option value="">---</option>
+                {% for style in styles %}
+                    <option value="{{ style }}">{{ style }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>알림 메시지</label>
+            {{ form.body | safe }}
+        </div>
+        <button type="submit" class="ui primary icon labeled button"><i class="send icon"></i>{{ _('Send!') }}</button>
+    </form>
+{% endblock %}

@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
-from django.db.models import F
+from django.db.models import Q, F
 from django.forms.models import ModelForm
 from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, Http404, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404, render
+from django.utils import timezone
 from django.utils.translation import ugettext as _
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, UpdateView
@@ -16,11 +18,12 @@ from reversion import revisions
 from reversion.models import Version
 
 from judge.dblock import LockModel
-from judge.models import Notification
+from judge.models import Profile, Contest, ContestParticipation, Organization, Notification
+from judge.forms import NewNotificationForm
 from judge.utils.views import TitleMixin
 from judge.widgets import MathJaxPagedownWidget
 
-__all__ = ['read_notification', 'get_notification', 'get_list_json']
+__all__ = ['read_notification', 'new_notifications', 'get_notification', 'get_list_json']
 
 @csrf_exempt
 @login_required
@@ -44,6 +47,17 @@ def read_notification(request):
 
     return JsonResponse({'id': notification_id, 'result': True}, safe=False)
 
+def new_notifications(user_list, body, style=None):
+    user_list = list(set(user_list))
+    print(user_list, body)
+    for profile in Profile.objects.filter(user__username__in=user_list).all():
+        try:
+            notification = Notification(user=profile, body=body, style=style)
+            notification.save()
+        except:
+            return False
+    return True
+
 def get_notification(request, read=None):
     try:
         if read is None:
@@ -57,6 +71,7 @@ def get_notification(request, read=None):
             item['id'] = noti.id
             item['user'] = noti.user.user.username
             item['read'] = noti.read
+            item['style'] = noti.style
             item['body'] = noti.body
             item['time'] = noti.time
             ret.append(item)       
@@ -72,3 +87,38 @@ def get_list_json(request):
         ret = get_notification(request)
     return JsonResponse(ret, safe=False)
 
+@login_required
+def send_notification(request):
+    if not request.user.has_perm('judge.send_notification'):
+        raise PermissionDenied()
+
+    form = NewNotificationForm()
+    profile = request.user.profile
+    if request.method == 'POST':
+        post = request.POST
+        send_to = post.getlist('profiles', [])
+        for contest in Contest.objects.filter(key__in=post.getlist('contests')).all():
+            send_to += [u.user.user.username for u in contest.users.all()]
+        for org in Organization.objects.filter(key__in=post.getlist('organizations')).all():
+            send_to += [u.user.username for u in org.members.all()]
+        result = new_notifications(send_to, post.get('body'), post.get('style'))
+        return HttpResponseRedirect(reverse('notification_send'))
+
+    else:
+        users = Profile.objects.order_by('user__username').all()
+        now = timezone.now()
+        contests = Contest.objects.filter(Q(start_time__lte=now, end_time__gte=now))
+        organizations = Organization.objects.all()
+        pass
+
+    styles = ['danger', 'dark', 'warning', 'success', 'default']
+    styles.sort()
+
+    return render(request, 'notification/send.html', {
+        'form': form,
+        'title': _('Send notifications'),
+        'users': users,
+        'contests': contests,
+        'organizations': organizations,
+        'styles': styles,
+    })
