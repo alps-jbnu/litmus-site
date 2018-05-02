@@ -17,6 +17,10 @@ class Notification(models.Model):
     read = models.BooleanField(verbose_name=_('have read'), default=False)
 
     class Meta:
+        permissions = (
+            ('see_all_notifications', _('See all notifications')),
+            ('send_notification', _('Send notification')),
+        )
         verbose_name = _('notification')
         verbose_name_plural = _('notifications')
 
