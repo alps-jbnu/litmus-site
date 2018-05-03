@@ -143,6 +143,7 @@ def send_notification(request):
 @login_required
 def my_notification_list(request):
     notifications = Notification.objects.filter(user=request.user.profile).order_by('-time').all()
+    notifications.update(read=True)
 
     return render(request, 'notification/list.html', {
         'title': _('Notifications'),
