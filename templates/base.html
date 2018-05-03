@@ -156,7 +156,7 @@
             $(document).ready(function(){
                 function show_notifications(){
                     var box = $("#notifications");
-                    $.getJSON( "/notifications/json/", {'unread': 1})
+                    $.getJSON( "{{ url('notification_json') }}", {'unread': 1})
                       .done(function( result ) {
                         result.forEach(function(e){
                           var el = $('#noti-' + e.id);
@@ -183,6 +183,8 @@
                             }
                           });
                         });
+
+                        $("#notification-bell").show().html('<div class="ui red circular label"><i class="bell icon"></i> '+(result.length)+'</div>'); 
                     })
                   ;
                 }
@@ -304,6 +306,8 @@
 
         <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}
+                <a href="{{ url('notification_list') }}" class="ui item" id="notification-bell" style="display: none;">
+                </a>
                 <div class="ui poiting dropdown link item">
 					<span class="text">
 						<img src="{{ gravatar(request.user, 32) }}" height="24" width="24">{# -#}
