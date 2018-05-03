@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block js_media %}
+    {% compress js %}
+        {# form.media.js #}
+    {% endcompress %}
+{% endblock %}
+
+{% block media %}
+    {% compress css %}
+        {# form.media.css #}
+        <style>
+            .notification.summary p {margin-bottom: 5px;}
+            .notification.summary img {max-width: 200px; height: auto !important;}
+        </style>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+    <div class="ui vertical segment">
+        <div class="ui feed">
+        {% for item in notifications %}
+          <div class="event">
+            <div class="label">
+              <i class="bell icon"></i>
+            </div>
+            <div class="content">
+              <div class="notification summary">
+                {{ item.body | safe }}
+                <div class="date" style="margin: 0;">
+                  {% trans time=item.time|date(_("N j, Y, g:i a")) %}
+                    {{ time }}
+                  {% endtrans %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}

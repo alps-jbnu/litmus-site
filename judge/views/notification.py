@@ -47,6 +47,11 @@ def read_notification(request):
 
     return JsonResponse({'id': notification_id, 'result': True}, safe=False)
 
+@login_required
+def read_all_notifications(request):
+    notifications = Notificaton.objects.filter(user=request.user.profile).all().update(read=True)
+
+
 def new_notifications(user_list, body, style=None):
     user_list = list(set(user_list))
     print(user_list, body)
@@ -121,4 +126,13 @@ def send_notification(request):
         'contests': contests,
         'organizations': organizations,
         'styles': styles,
+    })
+
+@login_required
+def my_notification_list(request):
+    notifications = Notification.objects.filter(user=request.user.profile).order_by('-time').all()
+
+    return render(request, 'notification/list.html', {
+        'title': _('Notifications'),
+        'notifications': notifications,
     })
