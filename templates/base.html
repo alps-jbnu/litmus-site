@@ -155,36 +155,50 @@
 
             $(document).ready(function(){
                 function show_notifications(){
-                    var box = $("#notifications");
-                    $.getJSON( "{{ url('notification_json') }}", {'unread': 1})
+                    var box = $("#notifications").find('.list');
+                    $.getJSON( "{{ url('notification_json') }}", {'unread': 1, 'limit': 5})
                       .done(function( result ) {
-                        result.forEach(function(e){
-                          var el = $('#noti-' + e.id);
-                          if( ! el.length ){
-                            var csrftok = "{% csrf_token %}";
-                            var fhtml = '<form action="{{ url('notification_read') }}" method="POST">' + csrftok + '<input type="hidden" name="id" value="'+ e.id +'"/></form>';
-                            var cls = e.style || '';
-                            box.html('<div class="item notification ' + cls + '" id="noti-' + e.id +'"><i class="close icon" data-id="'+ e.id +'"></i> ' + e.body + fhtml + '</div>' + box.html());
-                            $('#noti-' + e.id).transition('fly down');
+                        result.forEach(function(e, i){
+                          if( e.more !== undefined ){
+                            if( parseInt(e.more) > 0 ){
+                              $("#notification-more-divider").data('value', e.more);
+                              $("#notification-more-divider").find('.value').html(e.more);
+                              $("#notification-more-divider").show();
+                            } else {
+                              $("#notification-more-divider").hide();
+                            }
+                          } else {
+                            var el = $('#noti-' + e.id);
+                            if( ! el.length ){
+                              var csrftok = "{% csrf_token %}";
+                              var fhtml = '<form action="{{ url('notification_read') }}" method="POST">' + csrftok + '<input type="hidden" name="id" value="'+ e.id +'"/></form>';
+                              var cls = e.style || '';
+                              box.html('<div class="item notification active ' + cls + '" id="noti-' + e.id +'"><i class="close icon" data-id="'+ e.id +'"></i> ' + e.body + fhtml + '</div>' + box.html());
+                              $('#noti-' + e.id).show().transition('bounce');
+                            }
                           }
                         });
 
-                        $('.notification.item').find('.close').click(function(evt){
+                        $('.notification.item.active').find('.close').click(function(evt){
                           evt.stopPropagation();
                           evt.preventDefault();
                           var noti_id = $(this).data('id');
                           $(this).off(evt);
-                          $(this).parent().transition('vertical flip').remove();
+                          $(this).parent().transition('flip down').remove();
                           $.ajax({
                             type: "POST",
-                            url: "/notifications/read/",
+                            url: "{{ url('notification_read') }}",
                             data: $(this).parent().find('form').serialize(),
                             success: function(data){
                             }
                           });
                         });
 
-                        $("#notification-bell").show().html('<div class="ui red circular label"><i class="bell icon"></i> '+(result.length)+'</div>'); 
+                        var l = result.length + (parseInt($("#notification-more-divider").data('value')) || 0) - 1;
+                        if( l > 0 )
+                            $("#notification-bell").show().html('<div class="ui red circular label"><i class="bell icon"></i> '+ l +'</div>'); 
+                        else
+                            $("#notification-bell").hide();
                     })
                   ;
                 }
@@ -253,7 +267,18 @@
 <body class="pushable">
 
 <!-- Notifications -->
-<div id="notifications"></div>
+<div id="notifications">
+    <div class="notice">
+        <div id="notification-more-divider" data-value="0" class="item notification dark">
+            <p align="center">
+                <i class="plus icon"></i>
+                <br>
+                <span class="value"></span> {{ _('More...') }}
+            </p>
+        </div>
+    </div>
+    <div class="list"></div>
+</div>
 
 <!-- Sidebar for mobile -->
 <div class="ui left vertical inverted sidebar labeled icon menu uncover">

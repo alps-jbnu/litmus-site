@@ -63,12 +63,17 @@ def new_notifications(user_list, body, style=None):
             return False
     return True
 
-def get_notification(request, read=None):
+def get_notification(request, read=None, limit=None):
     try:
         if read is None:
             notifications = get_list_or_404(Notification, user=request.user.profile)
         else:
             notifications = get_list_or_404(Notification, user=request.user.profile, read=read)
+
+        more_count = 0
+        if limit is not None and len(notifications) > limit:
+            more_count = len(notifications) - limit
+            notifications = notifications[:limit]
 
         ret = []
         for noti in notifications:
@@ -80,16 +85,23 @@ def get_notification(request, read=None):
             item['body'] = noti.body
             item['time'] = noti.time
             ret.append(item)       
+
+        ret.append({
+            'more': more_count
+        })
+
         return ret
     except:
         return []
 
 @login_required
 def get_list_json(request):
+    limit = None if request.GET.get('limit') is None else int(request.GET.get('limit'))
     if request.GET.get('unread') is not None:
-        ret = get_notification(request, request.GET['unread'] == 'n')
+        read = request.GET['unread']=='n'
+        ret = get_notification(request, read=read, limit=limit)
     else:
-        ret = get_notification(request)
+        ret = get_notification(request, limit=limit)
     return JsonResponse(ret, safe=False)
 
 @login_required
