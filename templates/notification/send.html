@@ -18,6 +18,9 @@
 {% endblock %}
 
 {% block body %}
+    <div style="margin: 1em auto;">
+        <a href="{{ url('admin:judge_notification_changelist') }}" class="ui icon labeled red button"><i class="cog icon"></i>{{ _('Admin') }}</a>
+    </div>
     <form id="notification_submit" action="" method="post" class="ui form">
         {% csrf_token %}
         {{ form.non_field_errors() }}
