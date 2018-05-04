@@ -195,10 +195,12 @@
                         });
 
                         var l = result.length + (parseInt($("#notification-more-divider").data('value')) || 0) - 1;
-                        if( l > 0 )
-                            $("#notification-bell").show().html('<div class="ui red circular label"><i class="bell icon"></i> '+ l +'</div>'); 
-                        else
-                            $("#notification-bell").hide();
+                        if( l > 0 ){
+                            $("#notification-bell").find('.label').removeClass('idle').addClass('red').html('<i class="bell icon"></i> '+ l); 
+                        }
+                        else {
+                            $("#notification-bell").find('.label').removeClass('red').addClass('idle').html('<i class="bell outline icon" style="margin:0"></i>'); 
+                        }
                     })
                   ;
                 }
@@ -262,6 +264,7 @@
         #notifications .item p { margin: 0 0 .3em; }
         #notifications .item a { color: #eee; border-bottom: 1px dotted rgba(255,255,255,.75); }
         #notifications .item .icon.close { color: white; margin-right: 0; line-height: 1.3em; }
+        #notification-bell .label.idle { border: 1.5px solid #ccc; background: none; }
     </style>
 </head>
 <body class="pushable">
@@ -331,7 +334,8 @@
 
         <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}
-                <a href="{{ url('notification_list') }}" class="ui item" id="notification-bell" style="display: none;">
+                <a href="{{ url('notification_list') }}" class="ui item" id="notification-bell">
+                    <div class="ui red circular label"></div>
                 </a>
                 <div class="ui poiting dropdown link item">
 					<span class="text">
