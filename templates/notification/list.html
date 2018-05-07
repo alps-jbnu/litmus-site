@@ -18,24 +18,27 @@
 
 {% block body %}
     <div class="ui vertical segment">
-        <div class="ui feed">
-        {% for item in notifications %}
-          <div class="event">
-            <div class="label">
-              <i class="bell icon"></i>
+        {% for by_date in notifications %}
+            <h3 class="ui dividing header">{{ by_date.key }}</h3>
+            <div class="ui feed">
+                {% for item in by_date.list %}
+                  <div class="event">
+                    <div class="label">
+                        {% if loop.first %}<i class="bell icon"></i>{% endif %}
+                    </div>
+                   <div class="content">
+                      <div class="notification summary">
+                        {{ item.body | safe }}
+                        <div class="date" style="margin: 0;">
+                          {% trans time=item.time|date(_("a g:i")) %}
+                            {{ time }}
+                          {% endtrans %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
             </div>
-            <div class="content">
-              <div class="notification summary">
-                {{ item.body | safe }}
-                <div class="date" style="margin: 0;">
-                  {% trans time=item.time|date(_("N j, Y, g:i a")) %}
-                    {{ time }}
-                  {% endtrans %}
-                </div>
-              </div>
-            </div>
-          </div>
         {% endfor %}
-        </div>
     </div>
 {% endblock %}

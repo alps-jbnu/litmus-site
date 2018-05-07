@@ -1,4 +1,5 @@
 import json
+import itertools
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -145,7 +146,14 @@ def my_notification_list(request):
     notifications = Notification.objects.filter(user=request.user.profile).order_by('-time').all()
     notifications.update(read=True)
 
+    grouped_notifications = []
+    for key,group in itertools.groupby(notifications, key=lambda x: str(x.time)[:11]):
+        gr = {'key': key, 'list': []}
+        for element in group:
+            gr['list'].append(element)
+        grouped_notifications.append(gr)
+
     return render(request, 'notification/list.html', {
         'title': _('Notifications'),
-        'notifications': notifications,
+        'notifications': grouped_notifications,
     })
