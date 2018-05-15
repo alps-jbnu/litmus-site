@@ -23,6 +23,15 @@
             display: inline-block;
             padding-left: 3em;
         }
+ 
+        .content-description pre p { margin: 0 !important; }
+    </style>
+    <style type="text/css" media="print">
+        html, body { padding: 0 !important; }
+        .footer, .button.clarify { display: none; }
+        * { font-size: 97%; }
+		p { margin-bottom: 0; }
+        #content, #problem-title, .condition.table { margin-top: 0 !important; }
     </style>
 {% endblock %}
 
@@ -41,7 +50,7 @@
 
 {% block title_row %}
     <div class="">
-        <h1 class="ui huge header">
+        <h1 id="problem-title" class="ui huge header">
             {{ title }}
             <small>
                 {% if request.user.is_authenticated %}
@@ -91,6 +100,7 @@
 {% endblock %}
 
 {% block info_float %}
+  <div class="noprint">
     {% if request.user.is_authenticated and request.in_contest and submission_limit %}
         {% if submissions_left > 0 %}
             <a href="{{ url('problem_submit', problem.code) }}" class="unselectable button full">
@@ -204,10 +214,11 @@
         </div>
         <br>
     {% endif %}
+  </div>
 {% endblock %}
 
 {% block description %}
-    <table class="ui compact center aligned very basic table">
+    <table class="ui compact center aligned very basic condition table">
         <thead>
         <tr>
             <th>
@@ -277,6 +288,7 @@
 {% endblock %}
 
 {% block comments %}
+  <div class="noprint">
     {% if contest_problem and contest_problem.contest.use_clarifications %}
         <div class="clarifications-area">
             <h2><i class="fa fa-question-circle"></i> {{ _('Clarifications') }}</h2>
@@ -296,6 +308,7 @@
     {% else %}
         {% include "comments/list.html" %}
     {% endif %}
+  </div>
 {% endblock %}
 
 {% block bodyend %}

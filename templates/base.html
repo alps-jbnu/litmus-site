@@ -58,6 +58,9 @@
         <link rel="stylesheet" type="text/css" href="{{ static('libs/select2/select2.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('semantic-ui/semantic.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('responsive.css') }}">
+		<style type="text/css" media="print">
+		    .noprint{ display: none; }
+		</style>
     {% endcompress %}
     <link rel="canonical"
           href="{{ DMOJ_SCHEME }}://{{ DMOJ_CANONICAL|default(site.domain) }}{{ request.get_full_path() }}">
@@ -284,7 +287,7 @@
 </div>
 
 <!-- Sidebar for mobile -->
-<div class="ui left vertical inverted sidebar labeled icon menu uncover">
+<div class="ui left vertical inverted sidebar labeled icon menu uncover noprint">
 {% for node in mptt_tree(nav_bar) recursive %}
     {% with children=node.get_children() %}
         {% if children %}
@@ -298,7 +301,7 @@
 
 <div class="pusher">
 
-<nav id="navigation" class="unselectable">
+<nav id="navigation" class="unselectable noprint">
     <div class="ui inverted menu" style="border-radius:0;">
         <a id="navicon" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
         <div class="mobile hidden item" style="padding:0 1em;"><a href="{{ url('home') }}">{% include "site-logo-fragment.html" %}</a></div>
