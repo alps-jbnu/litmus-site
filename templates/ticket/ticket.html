@@ -33,6 +33,8 @@
         }
 
         .sidebox.sticky { z-index: 1; }
+
+        .comment.highlighted .text { background: rgba(232, 255, 44, 0.2); }
     </style>
 {% endblock %}
 
@@ -149,6 +151,22 @@
                 context: '#messages',
                 offset: 60
             });
+
+            if( !! location.hash && $(location.hash).length > 0 ){
+                window.scrollTo(0, 0);
+                var highlighted_comment = location.hash;
+                setTimeout(function(){
+                    document.querySelector(highlighted_comment).scrollIntoView({ 
+                        behavior: 'smooth' 
+                    });
+                }, 500);
+                $(highlighted_comment)
+                    .addClass('highlighted')
+                    .transition('flash')
+                    .transition('flash')
+                    .transition('flash')
+                ;
+            }
         });
     </script>
 
