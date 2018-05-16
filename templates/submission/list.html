@@ -198,6 +198,8 @@
                 width: 78%
             }
 
+            td.sub-memory .memory, td.sub-time .time { white-space: nowrap; }
+
             #status, #language {
                 visibility: hidden;
             }
@@ -216,17 +218,17 @@
         -->
 
         <div class="submission">
-            {% if page_obj.num_pages > 1 %}
-                <div style="margin-bottom:6px;margin-top:3px">
-                    {% include "list-pages.html" %}
-                </div>
-            {% endif %}
-
             <div id="ws-closed" style="display: none;"> 
                 <a href="javascript:void(0)" class="ui red message" style="display:block;">
                     {{ _('You were disconnected. Refresh to show latest updates.') }}
                 </a>
             </div>
+
+            {% if page_obj.num_pages > 1 %}
+                <div style="margin-bottom:6px;margin-top:3px">
+                    {% include "list-pages.html" %}
+                </div>
+            {% endif %}
 
             <table id="submissions-table" class="ui celled compact striped table">
                 <colgroup>
@@ -234,7 +236,8 @@
                     <col class="sub-info">
                     <col class="sub-testcase">
                     <col class="sub-prop">
-                    <col class="sub-usage">
+                    <col class="sub-time">
+                    <col class="sub-memory">
                 </colgroup>
                 {% set profile_id = request.user.profile.id if request.user.is_authenticated else 0 %}
                 {% for submission in submissions %}
