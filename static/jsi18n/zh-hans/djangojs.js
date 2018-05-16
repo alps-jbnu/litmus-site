@@ -78,8 +78,8 @@
     "one letter Tuesday\u0004T": "T", 
     "one letter Wednesday\u0004W": "W", 
     "time format with day\u0004%d day %h:%m:%s": [
-      "%d \uc77c %h:%m:%s", 
-      "%d \uc77c %h:%m:%s"
+      "%d \uc77c %h\uc2dc\uac04 %m\ubd84 %s\ucd08", 
+      "%d \uc77c %h\uc2dc\uac04 %m\ubd84 %s\ucd08"
     ], 
     "time format without day\u0004%h:%m:%s": "%h:%m:%s"
   };
