@@ -1851,7 +1851,7 @@ msgstr "만든 시간"
 
 #: judge/models/ticket.py:13
 msgid "assignees"
-msgstr "확인한 사람"
+msgstr "맡은 사람"
 
 #: judge/models/ticket.py:14
 msgid "quick notes"
@@ -3527,7 +3527,7 @@ msgstr ""
 
 #: templates/ticket/ticket.html:309
 msgid "No one is assigned."
-msgstr ""
+msgstr "아무도 맡지 않음."
 
 #: templates/ticket/ticket.html:315
 msgid "Close ticket"
@@ -3543,7 +3543,7 @@ msgstr ""
 
 #: templates/ticket/ticket.html:328 templates/widgets/select_all.html:4
 msgid "Nothing here."
-msgstr ""
+msgstr "아무것도 없습니다."
 
 #: templates/ticket/ticket.html:376
 msgid "Post"
@@ -3555,7 +3555,7 @@ msgstr ""
 
 #: templates/user/edit-profile.html:91
 msgid "Display name"
-msgstr ""
+msgstr "표시될 이름"
 
 #: templates/user/edit-profile.html:95
 msgid "Self-description"
