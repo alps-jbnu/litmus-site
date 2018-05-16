@@ -53,14 +53,14 @@ def read_all_notifications(request):
     notifications = Notificaton.objects.filter(user=request.user.profile).all().update(read=True)
 
 
-def new_notifications(user_list, body, style=None):
+def new_notifications(user_list, body, style=''):
     user_list = list(set(user_list))
-    print(user_list, body)
     for profile in Profile.objects.filter(user__username__in=user_list).all():
         try:
             notification = Notification(user=profile, body=body, style=style)
             notification.save()
-        except:
+        except Exception, err:
+            print(Exception, err)
             return False
     return True
 
@@ -157,3 +157,4 @@ def my_notification_list(request):
         'title': _('Notifications'),
         'notifications': grouped_notifications,
     })
+
