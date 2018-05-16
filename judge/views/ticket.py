@@ -26,6 +26,7 @@ from judge.models import Ticket, TicketMessage, Problem
 from judge.utils.diggpaginator import DiggPaginator
 from judge.utils.tickets import own_ticket_filter, filter_visible_tickets
 from judge.utils.views import TitleMixin, paginate_query_context
+from judge.views.notification import new_notifications
 from judge.widgets import HeavyPreviewPageDownWidget
 
 ticket_widget = (forms.Textarea() if HeavyPreviewPageDownWidget is None else
@@ -80,13 +81,19 @@ class NewTicketView(LoginRequiredMixin, SingleObjectFormView):
         message = TicketMessage(ticket=ticket, user=ticket.user, body=form.cleaned_data['body'])
         message.save()
         ticket.assignees.set(self.get_assignees())
+        link_url = reverse('ticket', args=[ticket.id])
+        new_notifications(
+            [u.user.username for u in self.get_assignees()],
+            ('%s: <a href=\"%s\">%s</a>') % (_('New ticket was registered'), link_url, ticket.title),
+            'success'
+        )
         if event.real:
             event.post('tickets', {
                 'type': 'new-ticket', 'id': ticket.id,
                 'message': message.id, 'user': ticket.user_id,
                 'assignees': list(ticket.assignees.values_list('id', flat=True)),
             })
-        return HttpResponseRedirect(reverse('ticket', args=[ticket.id]))
+        return HttpResponseRedirect(link_url)
 
 
 class NewProblemTicketView(TitleMixin, NewTicketView):
@@ -139,13 +146,22 @@ class TicketView(TitleMixin, LoginRequiredMixin, TicketMixin, SingleObjectFormVi
                                 body=form.cleaned_data['body'],
                                 ticket=self.object)
         message.save()
+        link_url = '%s#message-%d' % (reverse('ticket', args=[self.object.id]), message.id)
+        messages = self.object.messages.select_related('user__user')
+        assignees = self.object.assignees.select_related('user')
+        user_list = set([m.user.user.username for m in messages] + [u.user.username for u in assignees])
+        user_list.remove(self.request.user.username)
+        new_notifications(
+            user_list,
+            ('%s: <a href=\"%s\">%s</a>') % (_('Replied ticket for'), link_url, self.object.title)
+        )
         if event.real:
             event.post('tickets', {
                 'type': 'ticket-message', 'id': self.object.id,
                 'message': message.id, 'user': self.object.user_id,
                 'assignees': list(self.object.assignees.values_list('id', flat=True)),
             })
-        return HttpResponseRedirect('%s#message-%d' % (reverse('ticket', args=[self.object.id]), message.id))
+        return HttpResponseRedirect(link_url)
 
     def get_title(self):
         return _('%(title)s - Ticket %(id)d') % {'title': self.object.title, 'id': self.object.id}
