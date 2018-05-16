@@ -336,6 +336,13 @@
             </a>
         {% endif %}
 
+        {% if request.user.is_authenticated %}
+            <a href="{{ url('ticket_list') }}" class="nav-notification mobile hidden item">
+                {% if request.user.is_staff or request.user.is_superuser %}모든{% else %}내{% endif %}
+                질문들
+            </a>
+        {% endif %}
+
         <div class="right menu" id="user-links">
             {% if request.user.is_authenticated %}
                 <a href="{{ url('notification_list') }}" class="ui item" id="notification-bell">
