@@ -32,7 +32,7 @@ class CommentForm(ModelForm):
         }
 
         if SummernoteWidget is not None:
-            widgets['body'] = SummernoteWidget()
+            widgets['body'] = SummernoteWidget(attrs={'height': '200px'})
 
     def __init__(self, request, *args, **kwargs):
         self.request = request

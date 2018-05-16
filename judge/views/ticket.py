@@ -20,6 +20,8 @@ from django.views import View
 from django.views.generic import FormView, ListView
 from django.views.generic.detail import SingleObjectMixin
 
+from django_summernote.widgets import SummernoteWidget
+
 from judge import event_poster as event
 from judge.models import Profile
 from judge.models import Ticket, TicketMessage, Problem
@@ -27,11 +29,8 @@ from judge.utils.diggpaginator import DiggPaginator
 from judge.utils.tickets import own_ticket_filter, filter_visible_tickets
 from judge.utils.views import TitleMixin, paginate_query_context
 from judge.views.notification import new_notifications
-from judge.widgets import HeavyPreviewPageDownWidget
 
-ticket_widget = (forms.Textarea() if HeavyPreviewPageDownWidget is None else
-                 HeavyPreviewPageDownWidget(preview=reverse_lazy('ticket_preview'),
-                                            preview_timeout=1000, hide_preview_button=True))
+ticket_widget = (forms.Textarea() if SummernoteWidget is None else SummernoteWidget(attrs={'height': '200px'}))
 
 
 class TicketForm(forms.Form):
