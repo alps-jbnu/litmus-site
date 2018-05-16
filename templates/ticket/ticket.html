@@ -20,76 +20,6 @@
             color: darkred;
         }
 
-        .container {
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: row-reverse;
-            max-width: 1000px;
-        }
-
-        .ticket-sidebar {
-            flex: 1;
-            padding: 10px 0 0 10px;
-            max-width: 200px;
-        }
-
-        .ticket-info {
-            position: sticky;
-            top: 60px;
-        }
-
-        .ticket-messages {
-            flex: 1;
-        }
-
-        .info-box {
-            margin: 5px 0 10px;
-            border: 1px #999 solid;
-            border-radius: 5px;
-        }
-
-        .info-title {
-            padding: 2px 5px;
-            font-weight: 600;
-            border-bottom: 1px #999 solid;
-            background: #eee;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .info-data {
-            padding: 2px 5px;
-        }
-
-        .info-empty {
-            color: #999;
-            font-style: italic;
-        }
-
-        .close-ticket {
-            display: block;
-            width: 100%;
-            background: linear-gradient(to bottom, #4bad00 0%, #278811 100%);
-            border-color: #24710e;
-            font-weight: 600;
-        }
-
-        .close-ticket:hover {
-            background: #24710e;
-        }
-
-        .open-ticket {
-            display: block;
-            width: 100%;
-            background: linear-gradient(to bottom, #ff130f, #b03d17);
-            border-color: #853011;
-            font-weight: 600;
-        }
-
-        .open-ticket:hover {
-            background: #853011;
-        }
-
         a.edit-notes {
             float: right;
         }
@@ -102,64 +32,7 @@
             margin-bottom: 0;
         }
 
-        .message {
-            display: flex;
-            margin-top: -40px;
-            padding-top: 55px;
-        }
-
-        .message .info {
-            width: 130px;
-        }
-
-        .message .username {
-            text-align: center;
-        }
-
-        .message .gravatar {
-            width: 80px;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .message .message-date, .message .message-time {
-            display: inline-block;
-        }
-
-        .message .detail {
-            border: 1px #999 solid;
-            border-radius: 5px;
-            flex: 1;
-        }
-
-        .message .header {
-            background: #eee;
-            color: #777;
-            border-bottom: 1px solid #999;
-            border-radius: 5px 5px 0 0;
-            padding: 2px 7px;
-            text-align: right;
-        }
-
-        .message .content {
-            padding: 7px;
-        }
-
-        .message .content :first-child {
-            margin-top: 0;
-        }
-
-        .message .content :last-child {
-            margin-bottom: 0;
-        }
-
-        .new-message .detail {
-            padding: 8px 10px;
-        }
-
-        .new-message .submit, #edit-notes .submit {
-            margin: 10px 0 0 auto;
-        }
+        .sidebox.sticky { z-index: 1; }
     </style>
 {% endblock %}
 
@@ -271,6 +144,11 @@
                     }
                 );
             }
+
+            $(".ui.sidebox.sticky").sticky({
+                context: '#messages',
+                offset: 60
+            });
         });
     </script>
 
@@ -291,92 +169,98 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <aside class="ticket-sidebar">
-            <div class="ticket-info">
-                <div class="info-box">
-                    <div class="info-title">{{ _('Associated object') }}</div>
-                    <div class="info-data">
-                        <a href="{{ ticket.linked_item.get_absolute_url() }}">{{ ticket.linked_item }}</a>
-                    </div>
-                </div>
-                <div class="info-box">
-                    <div class="info-title">{{ _('Assignees') }}</div>
-                    <div class="info-data">
-                        {% if assignees %}
-                            {{ link_users(assignees) }}
-                        {% else %}
-                            <div class="info-empty">{{ _('No one is assigned.') }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <button data-ajax="{{ url('ticket_close', ticket.id) }}" data-open="0" class="close-ticket"
-                        {% if not ticket.is_open %}style="display: none"{% endif %}>{{ _('Close ticket') }}</button>
-                <button data-ajax="{{ url('ticket_open', ticket.id) }}" data-open="1" class="open-ticket"
-                        {% if ticket.is_open %}style="display: none"{% endif %}>{{ _('Reopen ticket') }}</button>
-
-                {% if perms.judge.change_ticket or request.user.profile in assignees %}
-                    <div class="info-box">
-                        <div class="info-title">{{ _('Assignee notes') }}
-                            <a href="#" data-featherlight="{{ url('ticket_notes', ticket.id) }}" class="edit-notes">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                        </div>
-                        <div id="ticket-notes" class="info-data">
-                            <div{% if ticket.notes %} style="display: none"{% endif %} class="info-empty">
-                                {{ _('Nothing here.') }}
-                            </div>
-                            <div class="info-real">{{ ticket.notes|linebreaks }}</div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        </aside>
-
-        <div class="ticket-messages">
-            <main class="messages">
+    <div class="ui grid">
+        <div class="twelve wide column">
+            <div class="ui comments" id="messages" style="max-width:100%;">
                 {% for message in messages %}
-                    <section id="message-{{ message.id }}" class="message">
-                        <div class="info">
-                            <a href="{{ url('user_page', message.user.user.username) }}" class="user">
-                                <img src="{{ gravatar(message.user, 135) }}" class="gravatar">
-                                <div class="username {{ message.user.css_class }}">{{ message.user.user.username }}</div>
-                            </a>
-                        </div>
-                        <div class="detail">
-                            <div class="header">
-                                <div class="relative-time"></div>
-                                <div class="message-date">{{ message.time|date('DATE_FORMAT') }}</div>
-                                <div class="message-time">{{ message.time|time('TIME_FORMAT') }}</div>
+                    <div class="comment" id="message-{{ message.id }}" style="margin-bottom: 10px;">
+                        <a href="{{ url('user_page', message.user.user.username) }}" class="avatar">
+                            <img src="{{ gravatar(message.user) }}" class="gravatar">
+                        </a>
+                        <div class="content">
+                            <a href="{{ url('user_page', message.user.user.username) }}" class="author username {{ message.user.css_class }}">{{ message.user.user.username }}</a>
+                            <div class="metadata">
+                                <span class="relative-time"></span>
+                                <span class="message-date">{{ message.time|date('DATE_FORMAT') }}</span>
+                                <span class="message-time">{{ message.time|time('TIME_FORMAT') }}</span>
                             </div>
-                            <div class="content content-description">
+                            <div class="ui text stacked padded segment">
                                 {{ message.body|markdown('ticket', MATH_ENGINE)|reference|str|safe }}
                             </div>
                         </div>
-                    </section>
+                    </div>
                 {% endfor %}
-            </main>
-            <hr>
-            <section class="message new-message">
-                <div class="info">
-                    <a href="{{ url('user_page') }}" class="user">
+
+                <div class="ui divider"></div>
+
+                <div class="comment">
+                    <a href="{{ url('user_page') }}" class="avatar">
                         <img src="{{ gravatar(request.user) }}" class="gravatar">
-                        <div class="username {{ request.user.profile.css_class }}">{{ request.user.username }}</div>
                     </a>
-                </div>
-                <div class="detail">
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <div class="form-errors">
-                            {{ form.non_field_errors() }}
-                            {{ form.body.errors }}
+                    <div class="content">
+                        <a href="{{ url('user_page') }}" class="author username {{ request.user.profile.css_class }}">{{ request.user.username }}</a>
+                        <div class="ui text basic segment">
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                <div class="form-errors">
+                                    {{ form.non_field_errors() }}
+                                    {{ form.body.errors }}
+                                </div>
+                                <div class="body-block">{{ form.body }}</div>
+                                <button type="submit" class="ui icon labeled submit primary button">
+                                    <i class="send icon"></i>
+                                    {{ _('Post') }}
+                                </button>
+                            </form>
                         </div>
-                        <div class="body-block">{{ form.body }}</div>
-                        <button type="submit" class="submit">{{ _('Post') }}</button>
-                    </form>
+                    </div>
                 </div>
-            </section>
+            </div>
+        </div>
+        <div class="four wide center aligned column">
+            <div class="ui sidebox sticky">
+                <h4 class="ui header">{{ _('Associated object') }}</h4>
+                <p>
+                    <a href="{{ ticket.linked_item.get_absolute_url() }}" class="item">
+                        <b>{{ ticket.linked_item }}</b>
+                    </a>
+                </p>
+
+                <div class="ui divider"></div>
+
+                <h4 class="ui header">{{ _('Assignees') }}</h4>
+                <p>
+                    {% if assignees %}
+                        {{ link_users(assignees) }}
+                    {% else %}
+                        <i>{{ _('No one is assigned.') }}</i>
+                    {% endif %}
+                </p>
+
+                <div class="ui divider"></div>
+
+                <button data-ajax="{{ url('ticket_close', ticket.id) }}" data-open="0" class="ui red button close-ticket"
+                        {% if not ticket.is_open %}style="display: none"{% endif %}>{{ _('Close ticket') }}</button>
+                <button data-ajax="{{ url('ticket_open', ticket.id) }}" data-open="1" class="ui green button open-ticket"
+                        {% if ticket.is_open %}style="display: none"{% endif %}>{{ _('Reopen ticket') }}</button>
+
+                {% if perms.judge.change_ticket or request.user.profile in assignees %}
+                    <div class="ui divider"></div>
+
+                    <h4 class="ui header">
+                        {{ _('Assignee notes') }}
+                        <a href="#" data-featherlight="{{ url('ticket_notes', ticket.id) }}" class="edit-notes">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                    </h4>
+                    <div id="ticket-notes">
+                        <div{% if ticket.notes %} style="display: none"{% endif %} class="info-empty">
+                            <i>{{ _('Nothing here.') }}</i>
+                        </div>
+                        <div class="info-real">{{ ticket.notes|linebreaks }}</div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}
