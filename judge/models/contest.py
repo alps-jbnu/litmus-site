@@ -89,6 +89,8 @@ class Contest(models.Model):
     access_code = models.CharField(verbose_name=_('access code'), blank=True, max_length=255,
                                    help_text=_('An optional code to prompt contestants before they are allowed '
                                                'to join the contest. Leave it blank to disable.'))
+    use_balloons = models.BooleanField(verbose_name=_('use balloons'), default=False,
+                                       help_text=_('If enabled, use ranking table with balloons'))
 
     def clean(self):
         if self.start_time >= self.end_time:

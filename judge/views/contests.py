@@ -564,7 +564,10 @@ def contest_ranking_view(request, contest, participation=None):
         context['in_contest'] = False
     context['now'] = timezone.now()
 
-    return render(request, 'contest/ranking.html', context)
+    if contest.use_balloons:
+        return render(request, 'contest/ranking-balloons.html', context)
+    else:
+        return render(request, 'contest/ranking.html', context)
 
 
 def contest_ranking(request, contest):
