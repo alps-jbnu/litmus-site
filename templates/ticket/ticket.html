@@ -203,7 +203,7 @@
                                 <span class="message-time">{{ message.time|time('TIME_FORMAT') }}</span>
                             </div>
                             <div class="ui text stacked padded segment">
-                                {{ message.body|markdown('ticket', MATH_ENGINE)|reference|str|safe }}
+                                {{ message.body|safe }}
                             </div>
                         </div>
                     </div>
