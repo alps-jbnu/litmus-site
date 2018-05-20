@@ -1,0 +1,68 @@
+{% extends "spotboard.html" %}
+
+{% block media %}
+<link rel="stylesheet" href="{{ static('spotboard.css') }}"/>
+<style>
+    {% for p in problems %}
+        .balloon-{{- loop.index }} {
+            background-image: url({{ balloons[p.problem.code].url }});
+        }
+    {% endfor %}
+
+    .balloon-full-score {}
+    .balloon-partial-score,.balloon-pretest-partial-score { opacity: .25; }
+    .balloon-failed-score,.balloon-pretest-failed-score { display: none !important; }
+    .balloon-pretest-full-score { opacity: .75; }
+
+    {% for i in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+        .problem-result.problem-{{- loop.index0 }} b:before { content: '{{ i }}'; }
+    {% endfor %}
+</style>
+{% endblock %}
+
+{% macro team_row(team) -%}
+    <div id="team-{{ team.id }}" class="team solved-{{ team.solved }}">
+      <span class="solved-count {{ team.solved_group }}">{{ team.solved }}</span>
+      <span class="team-rank suffix-{{ team.rank_suffix }}">{{ team.rank }}</span>
+      <span class="team-penalty" data-detail="{{ team.penalty }}" >{{ team.penalty|int }}</span>
+      <div class="results">
+        {% for p in team.problems %}
+          {% if p %}
+            <a href="{{ url('contest_user_submissions', contest.key, team.user.username, p.problem_code) }}" class="problem-result problem-{{- loop.index0 }} {{ p.state }} {% if p.last_status == 'QU' or p.last_status == 'P' %} pending {% endif %}">
+              <b class="problem-result-text">
+                {% if p.try > 0 %}+{{ p.try }}{% endif %}
+              </b>
+            </a>
+          {% else %}
+            <a class="problem-result problem-{{- loop.index0 }}">
+              <b class="problem-result-text"></b>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="balloons">
+        {% for problem in team.problems %}
+            {% if problem %}
+                {% with balloon_info = balloons[problem.problem_code] %}
+                    <span class="balloon balloon-{{- loop.index }} balloon-{{ problem.state }}" data-inverted="" data-tooltip="{{ balloon_info.problem.name }}" data-position="bottom center"></span>
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+      </div>
+      <div class="team-title">
+        <span class="team-name">{{ team.user.profile.display_name }}</span>
+<!--        <span class="team-represents">{{ team.user.username }}</span> -->
+      </div>
+      <div class="clear"></div>
+    </div>
+{%- endmacro %}
+
+{% block body %}
+    <div id="team-list">
+        {% for team in teams %}
+            {{ team_row(team) }}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+

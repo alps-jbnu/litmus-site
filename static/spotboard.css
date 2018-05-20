@@ -1,0 +1,450 @@
+@charset "UTF-8";
+
+* {
+    font-family: 'Nanum Gothic', sans-serif;
+    font-weight: 300;
+}
+
+.clear {
+    clear: both;
+}
+
+.center {
+    text-align: center;
+}
+
+/* scoreboard */
+
+#team-list, #dashboard {
+    position: relative;
+    font-size: 1.05em;
+    margin: 0;
+}
+
+.award-mode #team-list {
+    margin-top: 0em;
+}
+
+@media all and (min-width: 1300px) {
+    .dashboard #team-list {
+        width: calc(100% - 256px - 10px);
+        float: left;
+    }
+}
+
+.team.target {
+    position: relative;
+    z-index: 100;
+    background-color: #E2F08B !important;
+}
+
+/* basic team display */
+div.team {
+    font-size: 2.0em;
+    height: 2.0em; /* see also spotboard.animation.js */
+    display: block;
+    position: relative;
+}
+
+div.team:hover {
+    background-color: #E2F08B;
+}
+div.team:hover .solved-count {
+    background: transparent;
+    color: black; 
+}
+
+div.team a {
+    outline: 0;
+}
+div.team:hover a {
+    border-color: #E2F08B;
+}
+
+.team-rank {
+    display: block;
+    position: relative;
+    top: 0.3em;
+    padding: 0;
+    width: 2.5em;
+
+    float: left;
+}
+
+.suffix-st::after {
+    font-size: 0.5em;
+    content: "st";
+    vertical-align: super;
+}
+
+.suffix-nd::after {
+    font-size: 0.5em;
+    content: "nd";
+    vertical-align: super;
+}
+
+.suffix-rd::after {
+    font-size: 0.5em;
+    content: "rd";
+    vertical-align: super;
+}
+
+.suffix-th::after {
+    font-size: 0.5em;
+    content: "th";
+    vertical-align: super;
+}
+
+.solved-count {
+    display: block;
+    float: left;
+    height: 100%;
+
+    overflow: hidden;
+    width: 2.0em;
+    padding-left: 0.1em;
+    padding-right: 0.1em;
+    font-weight: 600;
+
+    vertical-align: bottom;
+    text-align: right;
+    padding-right: 0.2em;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+
+    color: transparent;
+    text-shadow: none;
+
+    line-height: 140%;
+    font-size: 1.4em;
+    letter-spacing: -0.1em;
+
+    margin-right: 0.3em;
+
+    background: #333;
+}
+
+.solved-count.first {
+    color: white;
+}
+
+.solved-count.first {
+    border-top-right-radius: 0.3em;
+}
+
+.solved-count.last {
+    border-bottom-right-radius: 0.3em;
+}
+
+
+.team-title {
+    display: block;
+    position: relative;
+    top: 0.5em;
+    padding-right: 0.6em;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    font-size: 0.9em;
+    white-space: nowrap;
+    /* overflow: hidden; */
+}
+
+.team-name {
+    text-overflow: ellipsis;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.show-group .team-title {
+    top: 0.1em;
+}
+.team-represents {
+    display: block;
+    padding: 0 0.6em 0 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    font-weight: 400;
+    margin-top: -0.3em;
+    font-size: 0.7em;
+}
+
+.show-group .team-represents {
+    display: block;
+}
+
+/* support mobile devices, by hiding balloon and narrowing result box*/
+@media all and (max-width: 1000px) {
+    .balloon {
+        /* instead of block */
+        display: none !important;
+    }
+    .problem-result {
+        /* instead of 2.3em */
+        width: 2.0em !important;
+    }
+}
+
+div.balloons {
+    float: right;
+    position: relative;
+}
+
+.balloon {
+    float: right;
+    display: block;
+    position: relative;
+    width: 1.75em;
+    height: 1.75em;
+    top: 0em;
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-left: -1.25em;
+}
+
+div.results {
+    float: right;
+}
+div.results:after {
+    clear:both;
+}
+
+.problem-result {
+    float: left;
+    display: block;
+    position: relative;
+
+    -ms-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+
+    height: 3.3333em;
+    border: 1px solid white;
+    width: 2.3em;
+    font-size: 0.6em;
+    line-height: 450%;
+    letter-spacing: -1px;
+    font-weight: 600;
+    color: white;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+
+    text-align: center;
+    text-shadow: none;
+}
+
+.problem-result:after { /* tooltip element w/ balloon.css */
+    height: 20px;
+    font-size: 13px;
+    line-height: 19px; /* TODO weird !!! */
+    font-weight: normal;
+    letter-spacing: 0px;
+}
+.problem-result.solved-first:after {
+    /* for first-solved run, slightly modify the tooltip text */
+    content: attr(data-balloon) " (First Solve)";
+}
+
+
+/* inner text (e.g. +1, -7) */
+.problem-result b {
+    font-weight: 600;
+}
+
+#wrapper:not(.award-mode) .team:hover .problem-result {
+    border-color: #E2F08B;
+}
+
+.team.target .problem-result {
+    border-color: #E2F08B !important;
+}
+
+.problem-result b:before {
+    color: #bbb;
+    content: '';
+    display: block;
+    text-align: center;
+    line-height: 120%;
+    font-weight: 600;
+    font-size: 1.3em;
+    text-shadow: 0 0 1px rgba(153,153,153,0.5);
+    position: relative;
+    top: 0;
+    right: 0.1em;
+    float: right;
+    height: 100%;
+    box-sizing: border-box;
+    margin-left: -0.5em;
+    letter-spacing: 0px;
+}
+
+@-webkit-keyframes flip-before-animation {
+    from {
+        -webkit-transform: rotateX(0deg);
+    }
+    to {
+        -webkit-transform: rotateX(90deg);
+    }
+}
+
+@-webkit-keyframes flip-after-animation {
+    from {
+        -webkit-transform: rotateX(270deg);
+    }
+    to {
+        -webkit-transform: rotateX(360deg);
+    }
+}
+
+.flip-before {
+    -webkit-animation-name: flip-before-animation;
+/*    -webkit-animation-timing-function: cubic-bezier(1, 0, 1, 1);    */
+    -webkit-animation-fill-mode: forwards !important;
+}
+
+.flip-after {
+    -webkit-animation-name: flip-after-animation;
+/*    -webkit-animation-timing-function: cubic-bezier(0, 0, 0, 1);    */
+    -webkit-animation-fill-mode: forwards !important;
+}
+
+.problem-result.flip-before:not(.solved):not(.failed):not(.pending) {
+    background-color: #888888;
+    -webkit-transition: background-color 1000ms ease-in-out;
+}
+
+
+#team-timeline-wrapper {
+    width: 100%;
+    padding: 1em 0;
+}
+
+#team-timeline {
+    margin: 0 6em;
+    height: 30em;
+}
+
+#team-timeline .accept-time {
+    background-color: rgba(255, 255, 255, 0.5);
+    font-size: 1.2em;
+    font-weight: 600;
+    text-shadow: none;
+    -webkit-border-radius: 0.3em;
+    -moz-border-radius: 0.3em;
+    -o-border-radius: 0.3em;
+    border-radius: 0.3em;
+}
+
+#team-timeline .tickLabels .yAxis .tickLabel {
+    font-weight: 600;
+}
+
+.full-score {
+    background-color: #52d889;
+}
+
+.full-score.solved-first {
+    background-color: #52d8ad;
+}
+
+.full-score b:before {
+    color: white;
+}
+
+.problem-result:hover, b.problem-result-text:hover, b.problem-result-text:hover:before {
+    color: black;
+}
+
+.failed-score {
+    background-color: #E68364;
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(166, 10, 10, 0.8),
+        rgba(166, 10, 10, 0.8) 10px,
+        #e06b66 10px,
+        #e06b66 20px
+    );
+}
+
+.failed-score b:before {
+    color: white;
+}
+
+.pending {
+    background-color: #E0B400;
+    color: #555;
+}
+
+.pending b:before {
+    color: #555;
+}
+
+.team-penalty {
+    display: block;
+    float: right;
+    padding-top: 0.3em;
+    width: 4em;
+    text-align: right;
+}
+
+.team-penalty:after {
+    content: " min.";
+    font-size: 0.5em;
+}
+
+#credits {
+    text-align: right;
+    font-size: 1.1em;
+    margin: 0.4em;
+    padding: 3em 0 0.6em 0;
+
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background:    -moz-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background:      -o-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background:   linear-gradient(to bottom,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+
+    position: relative;
+    z-index: 999;
+}
+
+#credits strong,
+#credits b {
+    font-weight: 600;
+}
+#credits a,
+#credits a:visited {
+    color: #1b6ec2;
+    text-decoration: none;
+}
+#credits a:hover {
+    color: #228ae6;
+}
+
+#credits > span {
+    display: block;
+}
+
+.test-button {
+    font-size: 2em;
+    background-color: black;
+    color: white;
+    text-shadow: none;
+    cursor: pointer;
+
+    display: none;
+}
+
+.test-button:hover {
+    background-color: gray;
+}
+
+/* vim: set ts=4 sts=4 sw=4: */

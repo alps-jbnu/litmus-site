@@ -8,6 +8,7 @@ from datetime import timedelta, date, datetime, time
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.staticfiles.templatetags.staticfiles import static as static_files
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.urlresolvers import reverse
@@ -565,7 +566,100 @@ def contest_ranking_view(request, contest, participation=None):
     context['now'] = timezone.now()
 
     if contest.use_balloons:
-        return render(request, 'contest/ranking-balloons.html', context)
+        import random
+        seed = sum([p.id for p in problems])
+        balloon_colors = [x for x in range(len(problems))]
+        random.Random(seed).shuffle(balloon_colors)
+
+        balloons = {}
+        for idx, p in enumerate(problems):
+            bid = balloon_colors[idx]
+            balloons[p.problem.code] = {
+                'url': static_files('balloons/balloon{}.png'.format(bid)),
+                'problem': p.problem
+            }
+        context['balloons'] = balloons
+
+        problems_by_users = {}
+        for cp in contest.contest_problems.all():
+            state = {}
+            pid = cp.problem.code
+            is_first_user = True
+            for sub in cp.submissions.order_by('submission__date').all():
+                s = sub.submission
+                u = s.user.user.username
+                cur = state[u] if u in state is not None else {
+                    'try': 0,
+                    'first': False,
+                    'last_status': None,
+                    'solved_at': None
+                }
+
+                if s.is_graded and cur['solved_at'] is None:
+                    if s.result == 'AC':
+                        cur['first'] = is_first_user
+                        cur['solved_at'] = s.date
+                        is_first_user = False
+                    cur['try'] += s.result != 'AC'
+                    cur['last_status'] = s.status
+                    cur['state'] = best_solution_state(s.points, s.problem.points)
+
+                state[u] = cur
+            problems_by_users[pid] = state
+
+        def rank_suffix(r):
+            return ["st", "nd", "rd", "th"][r-1 if r <= 3 else 3]
+
+        teams = []
+        start_time = contest.start_time
+        for u in users:
+            rank = u[0]
+            crp = u[1] # contest ranking profile
+
+            problems = []
+            penalty = 0
+            solved = 0
+            u = crp.user.username
+            for p in crp.problems:
+                if p is not None:
+                    solved += 1 if p.state == 'full-score' else 0
+                    us = problems_by_users[p.code]
+                    if us is not None:
+                        info = us[u]
+                        if info['solved_at']:
+                            spend_time = (info['solved_at'] - start_time).total_seconds() / 60
+                            penalty += 20 * info['try'] + spend_time
+                        info['problem_code'] = p.code
+                        problems.append(info)
+                else:
+                    problems.append(None)
+
+            team = {
+                'id': crp.id,
+                'rank': rank,
+                'rank_suffix': rank_suffix(rank),
+                'penalty': penalty,
+                'solved': solved,
+                'solved_group': '',
+                'user': crp.user,
+                'problems': problems,
+                'detail': crp
+            }
+
+            teams.append(team)
+
+        before_solved = -1
+        for i, t in enumerate(teams):
+            if before_solved != t['solved']:
+                t['solved_group'] = 'first'
+                if i > 0:
+                    teams[i-1]['solved_group'] += ' last'
+            before_solved = t['solved']
+
+        context['teams'] = teams
+
+        return render(request, 'contest/spotboard.html', context)
+
     else:
         return render(request, 'contest/ranking.html', context)
 
