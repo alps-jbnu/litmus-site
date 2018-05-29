@@ -18,6 +18,10 @@
         .problem-result.problem-{{- loop.index0 }} b:before { content: '{{ i }}'; }
     {% endfor %}
 </style>
+
+<script type="text/javascript">
+    setInterval(function(){console.log('refresh');location.reload();}, 10 * 1000);
+</script>
 {% endblock %}
 
 {% macro team_row(team) -%}
@@ -28,10 +32,8 @@
       <div class="results">
         {% for p in team.problems %}
           {% if p %}
-            <a href="{{ url('contest_user_submissions', contest.key, team.user.username, p.problem_code) }}" class="problem-result problem-{{- loop.index0 }} {{ p.state }} {% if p.last_status == 'QU' or p.last_status == 'P' %} pending {% endif %}">
-              <b class="problem-result-text">
-                {% if p.try > 0 %}+{{ p.try }}{% endif %}
-              </b>
+            <a href="{{ url('contest_user_submissions', contest.key, team.user.username, p.problem_code) }}" class="problem-result problem-{{- loop.index0 }} {{ p.state }} {% if p.last_status == 'QU' or p.last_status == 'P' %} pending{% endif %}{% if p.first %} solved-first{% endif %}">
+              <b class="problem-result-text">{% if p.try > 0 %}+{{ p.try }}{% endif %}</b>
             </a>
           {% else %}
             <a class="problem-result problem-{{- loop.index0 }}">

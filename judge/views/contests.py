@@ -648,6 +648,22 @@ def contest_ranking_view(request, contest, participation=None):
 
             teams.append(team)
 
+        def acm_scoring(item1, item2):
+            if item1['solved'] > item2['solved']:
+                return -1
+            elif item1['solved'] == item2['solved']:
+                if item1['penalty'] < item2['penalty']:
+                    return -1
+                else:
+                    return 1
+            else:
+                return 0
+
+        teams.sort(acm_scoring)
+        for i in range(len(teams)):
+            teams[i]['rank'] = i + 1
+            teams[i]['rank_suffix'] = rank_suffix(i + 1)
+
         before_solved = -1
         for i, t in enumerate(teams):
             if before_solved != t['solved']:
