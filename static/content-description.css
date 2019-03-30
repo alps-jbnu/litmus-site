@@ -145,9 +145,9 @@
     padding-top: 1em; }
     #content-right .info-float {
       float: none;
-      padding: 10px 0 0;
+      padding: 0;
       position: sticky;
-      top: 60px;
+      top: 70px;
       width: 100%; } }
 @media not all and (min-width: 700px) {
   #content-right .info-float {

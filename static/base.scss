@@ -375,7 +375,6 @@ hr {
     width: 90%;
     height: 100%;
     min-height: 25em;
-    max-width: 1300px;
     display: block;
 
     .title {
@@ -450,7 +449,7 @@ noscript #noscript {
     }
 }
 
-#form-errors {
+#form-errors, .form-errors {
     background: rgba(255, 0, 0, 0.3);
     border: 3px solid red;
     border-radius: $widget_border_radius;
@@ -524,7 +523,6 @@ noscript #noscript {
 
 #page-container {
     min-height: 100%;
-    max-width: 1300px;
     position: relative;
     margin: 0 auto;
     border-right: 1px solid $border_gray;
@@ -557,7 +555,7 @@ math {
     }
 }
 
-@media(max-width: 1300px) {
+@media(max-width: 1498px) {
     #page-container {
         border-left: none;
         border-right: none;
