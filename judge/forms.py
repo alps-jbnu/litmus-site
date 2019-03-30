@@ -1,11 +1,13 @@
 from operator import attrgetter
 
+import pyotp
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db.models import Q
-from django.forms import ModelForm, CharField, TextInput
+from django.forms import ModelForm, CharField, TextInput, Form
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
@@ -29,10 +31,11 @@ class ProfileForm(ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['name', 'student_id', 'about', 'organizations', 'timezone', 'language', 'ace_theme']
+        fields = ['name', 'student_id', 'about', 'organizations', 'timezone', 'language', 'ace_theme', 'user_script']
         widgets = {
             'name': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
             'student_id': TextInput(attrs={'style': 'width:100%;box-sizing:border-box'}),
+            'user_script': AceWidget(theme='github'),
             'timezone': Select2Widget(attrs={'style': 'width:200px'}),
             'language': Select2Widget(attrs={'style': 'width:200px'}),
             'ace_theme': Select2Widget(attrs={'style': 'width:200px'})
@@ -40,6 +43,12 @@ class ProfileForm(ModelForm):
 
         if SummernoteWidget is not None:
             widgets['about'] = SummernoteWidget
+
+        has_math_config = bool(getattr(settings, 'MATHOID_URL', False))
+        if has_math_config:
+            fields.append('math_engine')
+            widgets['math_engine'] = Select2Widget(attrs={'style': 'width:200px'})
+
 
     def clean(self):
         organizations = self.cleaned_data.get('organizations') or []
@@ -57,9 +66,6 @@ class ProfileForm(ModelForm):
             self.fields['organizations'].queryset = Organization.objects.filter(
                 Q(is_open=True) | Q(id__in=user.profile.organizations.all())
             )
-
-    def clean_name(self):
-        return fix_unicode(self.cleaned_data['name'] or '')
 
 
 class ProfileActivateForm(ModelForm):
@@ -116,11 +122,6 @@ class NewMessageForm(ModelForm):
             widgets['content'] = MathJaxPagedownWidget()
 
 
-class NewOrganizationForm(EditOrganizationForm):
-    class Meta(EditOrganizationForm.Meta):
-        fields = ['key'] + EditOrganizationForm.Meta.fields
-
-
 class CustomAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
@@ -145,3 +146,24 @@ class NewNotificationForm(ModelForm):
         if SummernoteWidget is not None:
             widgets['body'] = SummernoteWidget(attrs={'height': '200px'})
 
+class NoAutoCompleteCharField(forms.CharField):
+    def widget_attrs(self, widget):
+        attrs = super(NoAutoCompleteCharField, self).widget_attrs(widget)
+        attrs['autocomplete'] = 'off'
+        return attrs
+
+
+class TOTPForm(Form):
+    TOLERANCE = getattr(settings, 'DMOJ_TOTP_TOLERANCE_HALF_MINUTES', 1)
+
+    totp_token = NoAutoCompleteCharField(validators=[
+        RegexValidator('^[0-9]{6}$', _('Two Factor Authentication tokens must be 6 decimal digits.'))
+    ])
+
+    def __init__(self, *args, **kwargs):
+        self.totp_key = kwargs.pop('totp_key')
+        super(TOTPForm, self).__init__(*args, **kwargs)
+
+    def clean_totp_token(self):
+        if not pyotp.TOTP(self.totp_key).verify(self.cleaned_data['totp_token'], valid_window=self.TOLERANCE):
+            raise ValidationError(_('Invalid Two Factor Authentication token.'))

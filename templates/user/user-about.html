@@ -9,14 +9,36 @@
 
 {% block user_content %}
     <div class="content-description">
+        {% if perms.judge.change_profile %}
+            {% with notes=user.notes %}
+                {% if notes %}
+                    <p style="margin-top: 0"><b>{{ _('Admin Notes') }}: </b>
+                        {{ notes }}
+                    </p>
+                {% endif %}
+            {% endwith %}
+        {% endif%}
+
         {% if request.user == user.user or is_admin or request.user.is_superuser or perms.judge.change_organization %}
-            <h4>{{ user.user.username }}의 정보</h4>
-            <br>
             <blockquote>
                 <p>이름: {{ user.user.profile.display_name }}</p>
                 <p>학번: {{ user.user.profile.student_id }}</p>
                 <p>메일: <a href="matilto:{{ user.user.email }}">{{ user.user.email }}</a></p>
             </blockquote>            
+        {% elif user.about %}
+            <h4>{{ _('About') }}</h4>
+            {% cache 86400 'user_about' user.id MATH_ENGINE %}
+                {{ user.about|markdown('self-description', MATH_ENGINE)|reference|str|safe }}
+            {% endcache %}
+        {% else %}
+            <i>
+                {% if user.user == request.user %}
+                    {{ _('You have not shared any information.') }}
+                {% else %}
+                    {{ _('This user has not shared any information.') }}
+                {% endif %}
+            </i>
+            <br>
         {% endif %}
 
         <h4>{{ _('About') }}</h4>
@@ -57,8 +79,8 @@
                 <h4>참여 소속</h4>
                 <p style="margin-top: 0;">
                     {% for org in orgs -%}
-                        <a class="ui basic label" style="margin-top: 5px;" href="{{ url('organization_home', org.key) }}">{{ org.name }}</a>
-                        {%- if not loop.last %}&nbsp; {% endif %}
+                        <a class="ui basic label" style="margin-top: 5px;" href="{{ org.get_absolute_url() }}" }}">{{ org.name }}</a>
+                        {%- if not loop.last %}, {% endif %}
                     {% endfor %}
                 </p>
             {% endif %}

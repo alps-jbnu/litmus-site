@@ -1,7 +1,7 @@
 {% extends "common-content.html" %}
 {% block js_media %}
-    {% if dynamic_update and last_msg %}
-        <script type="text/javascript">
+    <script type="text/javascript">
+        {% if dynamic_update and last_msg %}
             {% if request.in_contest %}
                 window.current_contest = '{{request.participation.contest.key}}';
             {% else %}
@@ -22,8 +22,9 @@
             {% else %}
                 window.show_problem = 0;
             {% endif %}
-        </script>
-    {% endif %}
+        {% endif %}
+        window.results_json = {{ results_json }};
+    </script>
 
     {% compress js %}
         <script type="text/javascript" src="{{ static('event.js') }}"></script>
@@ -43,6 +44,9 @@
                 };
             </script>
         {% endif %}
+
+        <script src="{{ static('libs/chart.js/Chart.Core.js') }}"></script>
+        <script src="{{ static('libs/chart.js/Chart.Doughnut.js') }}"></script>
         <script type="text/javascript">
             $(function () {
                 var info_float = $('.info-float');
@@ -56,6 +60,42 @@
                     });
                     info_float.width(container.width());
                 }
+            });
+
+            // Draw the statistics graph.
+            var chart = null;
+            function stats_graph(raw_data) {
+                var colors = {
+                    TLE: '#a3bcbd',
+                    AC: '#00a92a',
+                    WA: '#ed4420',
+                    CE: '#42586d',
+                    ERR: '#ffa71c',
+                };
+
+                var ctx = $('#status-graph').find('canvas')[0].getContext('2d');
+                var font = $('body').css('font-family');
+                if (chart !== null) {
+                    chart.destroy();
+                }
+                chart = new Chart(ctx).Pie(raw_data.categories.map(function (entry) {
+                    return {
+                        color: colors[entry.code],
+                        label: entry.name,
+                        value: entry.count,
+                    };
+                }), {
+                    animation: false,
+                    scaleFontFamily: font,
+                    tooltipFontFamily: font,
+                    tooltipTitleFontFamily: font,
+                });
+
+                $('#total-submission-count').text(raw_data.total);
+            }
+
+            $(function () {
+                stats_graph(window.results_json);
             });
 
             function load_dynamic_update(last_msg) {
@@ -116,12 +156,17 @@
                 };
 
                 var stats_outdated = false;
+                var last_stat_update = Date.now();
+                var stats_update_interval = {{ stats_update_interval|default(0) * 1000 }};
 
                 function update_stats() {
+                    if (Date.now() - last_stat_update < stats_update_interval)
+                        return;
                     $.ajax({
                         url: '?results'
                     }).done(function (data) {
-                        statistics.html(data);
+                        last_stat_update = Date.now();
+                        stats_graph(data);
                     }).fail(function () {
                         console.log('Failed to update statistics table!' + id);
                     }).always(function () {
@@ -205,9 +250,26 @@
             }
         </style>
     {% endif %}
+
+    <style>
+        .total {
+            text-align: center;
+            margin-bottom: 0.5em;
+        }
+
+        #status-graph {
+            padding: 1em 0em;
+        }
+
+        #status-graph canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
+<<<<<<< HEAD
     {% include "submission/search-form.html" %}
 
     <div id="common-content" class="ui vertical segment">
@@ -250,5 +312,5 @@
 {% endblock %}
 
 {% block bodyend %}
-{# Don't load MathJax from common-content! #}
+    {# Don't load MathJax from common-content! #}
 {% endblock %}

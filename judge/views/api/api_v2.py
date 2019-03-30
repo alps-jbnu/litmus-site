@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from dmoj import settings
 from judge.models import Contest, Problem, Profile, Submission, ContestTag, ContestParticipation
 from judge.utils.ranker import ranker
-from judge.views.contests import contest_access_check, base_contest_ranking_list, contest_ranking_list
+from judge.views.contests import base_contest_ranking_list, contest_ranking_list
 
 
 def error(message):
@@ -49,7 +49,10 @@ def api_v2_user_info(request):
         ]
     }
    """
-    username = request.GET['username']
+    try:
+        username = request.GET['username']
+    except(KeyError):
+        return error("no username passed")
     if not username:
         return error("username argument not provided")
     try:
@@ -94,7 +97,7 @@ def api_v2_user_info(request):
     solved_problems = []
     attempted_problems = []
 
-    problem_data = (Submission.objects.filter(points__gt=0, user=profile, problem__is_public=True)
+    problem_data = (Submission.objects.filter(points__gt=0, user=profile, problem__is_public=True, problem__is_organization_private=False)
                     .annotate(max_pts=Max('points'))
                     .values_list('max_pts', 'problem__points', 'problem__code')
                     .distinct())
@@ -112,7 +115,7 @@ def api_v2_user_info(request):
         'points': profile.points,
         'solved': solved_problems,
         'attempted': attempted_problems,
-        'authored': list(Problem.objects.filter(authors=profile).values_list('code', flat=True))
+        'authored': list(Problem.objects.filter(is_public=True, is_organization_private=False, authors=profile).values_list('code', flat=True))
     }
 
     return JsonResponse(resp)

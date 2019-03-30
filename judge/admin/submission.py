@@ -1,6 +1,7 @@
 from functools import partial
 from operator import itemgetter
 
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.core.cache import cache
@@ -14,6 +15,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext, ugettext, ung
 from django_ace import AceWidget
 from judge.models import Submission, SubmissionTestCase, ContestSubmission, ContestParticipation, ContestProblem, \
     Profile
+from judge.utils.raw_sql import use_straight_join
 
 
 class SubmissionStatusFilter(admin.SimpleListFilter):
@@ -95,19 +97,19 @@ class SubmissionAdmin(admin.ModelAdmin):
               'case_points', 'case_total', 'judged_on', 'error')
     actions = ('judge', 'recalculate_score')
     list_display = ('id', 'problem_code', 'problem_name', 'user_column', 'execution_time', 'pretty_memory',
-                    'points', 'language', 'status', 'result', 'judge_column')
+                    'points', 'language_column', 'status', 'result', 'judge_column')
     list_filter = ('language', SubmissionStatusFilter, SubmissionResultFilter)
-    search_fields = ('problem__code', 'problem__name', 'user__user__username', 'user__name')
+    search_fields = ('problem__code', 'problem__name', 'user__user__username')
     actions_on_top = True
     actions_on_bottom = True
     inlines = [SubmissionTestCaseInline, ContestSubmissionInline]
-    date_hierarchy = 'date'
 
     def get_queryset(self, request):
-        queryset = Submission.objects.only(
-            'problem__code', 'problem__name', 'user__user__username', 'user__name', 'language__name',
+        queryset = Submission.objects.select_related('problem', 'user__user', 'language').only(
+            'problem__code', 'problem__name', 'user__user__username', 'language__name',
             'time', 'memory', 'points', 'status', 'result'
         )
+        use_straight_join(queryset)
         if not request.user.has_perm('judge.edit_all_problem'):
             id = request.user.profile.id
             queryset = queryset.filter(Q(problem__authors__id=id) | Q(problem__curators__id=id)).distinct()
@@ -123,13 +125,17 @@ class SubmissionAdmin(admin.ModelAdmin):
             return True
         return obj.problem.is_editor(request.user.profile)
 
+    def lookup_allowed(self, key, value):
+        return super(SubmissionAdmin, self).lookup_allowed(key, value) or key in ('problem__code',)
+
     def judge(self, request, queryset):
         if not request.user.has_perm('judge.rejudge_submission') or not request.user.has_perm('judge.edit_own_problem'):
             self.message_user(request, ugettext('You do not have the permission to rejudge submissions.'),
                               level=messages.ERROR)
             return
         queryset = queryset.order_by('id')
-        if queryset.count() > 10 and not request.user.has_perm('judge.rejudge_submission_lot'):
+        if not request.user.has_perm('judge.rejudge_submission_lot') and \
+                queryset.count() > getattr(settings, 'REJUDGE_SUBMISSION_LIMIT', 10):
             self.message_user(request, ugettext('You do not have the permission to rejudge THAT many submissions.'),
                               level=messages.ERROR)
             return
@@ -149,22 +155,15 @@ class SubmissionAdmin(admin.ModelAdmin):
             self.message_user(request, ugettext('You do not have the permission to rejudge submissions.'),
                               level=messages.ERROR)
             return
-        submissions = list(queryset.select_related('problem').only('points', 'case_points', 'case_total',
-                                                                   'problem__partial', 'problem__points'))
+        submissions = list(queryset.defer(None).select_related(None).select_related('problem')
+                           .only('points', 'case_points', 'case_total', 'problem__partial', 'problem__points'))
         for submission in submissions:
             submission.points = round(submission.case_points / submission.case_total * submission.problem.points
                                       if submission.case_total else 0, 1)
             if not submission.problem.partial and submission.points < submission.problem.points:
                 submission.points = 0
             submission.save()
-
-            if hasattr(submission, 'contest'):
-                contest = submission.contest
-                contest.points = round(submission.case_points / submission.case_total * contest.problem.points
-                                       if submission.case_total > 0 else 0, 1)
-                if not contest.problem.partial and contest.points < contest.problem.points:
-                    contest.points = 0
-                contest.save()
+            submission.update_contest()
 
         for profile in Profile.objects.filter(id__in=queryset.values_list('user_id', flat=True).distinct()):
             profile.calculate_points()
@@ -172,8 +171,8 @@ class SubmissionAdmin(admin.ModelAdmin):
             cache.delete('user_attempted:%d' % profile.id)
 
         for participation in ContestParticipation.objects.filter(
-                id__in=queryset.values_list('contest__participation_id')):
-            participation.recalculate_score()
+                id__in=queryset.values_list('contest__participation_id')).prefetch_related('contest'):
+            participation.recompute_results()
 
         self.message_user(request, ungettext('%d submission were successfully rescored.',
                                              '%d submissions were successfully rescored.',
@@ -191,9 +190,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     problem_name.admin_order_field = 'problem__name'
 
     def user_column(self, obj):
-        return format_html(u'<span title="{display}">{username}</span>',
-                           username=obj.user.user.username,
-                           display=obj.user.name)
+        return obj.user.user.username
     user_column.admin_order_field = 'user__user__username'
     user_column.short_description = _('User')
 
@@ -212,6 +209,11 @@ class SubmissionAdmin(admin.ModelAdmin):
             return ugettext('%.2f MB') % (memory / 1024.)
     pretty_memory.admin_order_field = 'memory'
     pretty_memory.short_description = _('Memory')
+
+    def language_column(self, obj):
+        return obj.language.name
+    language_column.admin_order_field = 'language__name'
+    language_column.short_description = _('Language')
 
     def judge_column(self, obj):
         return '<input type="button" value="Rejudge" onclick="location.href=\'%s/judge/\'" />' % obj.id

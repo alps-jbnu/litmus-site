@@ -78,7 +78,7 @@ class DjangoJudgeHandler(JudgeHandler):
         return time, memory, short_circuit, is_pretested
 
     def _authenticate(self, id, key):
-        result = Judge.objects.filter(name=id, auth_key=key).exists()
+        result = Judge.objects.filter(name=id, auth_key=key, is_blocked=False).exists()
         if not result:
             json_log.warning(self._make_json_log(action='auth', judge=id, info='judge failed authentication'))
         return result
@@ -139,7 +139,7 @@ class DjangoJudgeHandler(JudgeHandler):
     def on_submission_processing(self, packet):
         id = packet['submission-id']
         if Submission.objects.filter(id=id).update(status='P', judged_on=self.judge):
-            event.post('sub_%d' % id, {'type': 'processing'})
+            event.post('sub_%s' % Submission.get_id_secret(id), {'type': 'processing'})
             self._post_update_submission(id, 'processing')
             json_log.info(self._make_json_log(packet, action='processing'))
         else:
@@ -155,7 +155,7 @@ class DjangoJudgeHandler(JudgeHandler):
                 status='G', is_pretested=packet['pretested'],
                 current_testcase=1, batch=False):
             SubmissionTestCase.objects.filter(submission_id=packet['submission-id']).delete()
-            event.post('sub_%d' % packet['submission-id'], {'type': 'grading-begin'})
+            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'grading-begin'})
             self._post_update_submission(packet['submission-id'], 'grading-begin')
             json_log.info(self._make_json_log(packet, action='grading-begin'))
         else:
@@ -232,19 +232,11 @@ class DjangoJudgeHandler(JudgeHandler):
         submission.user.calculate_points()
         problem._updating_stats_only = True
         problem.update_stats()
-
-        if hasattr(submission, 'contest'):
-            contest = submission.contest
-            contest.points = round(points / total * contest.problem.points if total > 0 else 0, 3)
-            if not contest.problem.partial and contest.points != contest.problem.points:
-                contest.points = 0
-            contest.save()
-            submission.contest.participation.recalculate_score()
-            submission.contest.participation.update_cumtime()
+        submission.update_contest()
 
         finished_submission(submission)
 
-        event.post('sub_%d' % submission.id, {
+        event.post('sub_%s' % submission.id_secret, {
             'type': 'grading-end',
             'time': time,
             'memory': memory,
@@ -261,7 +253,7 @@ class DjangoJudgeHandler(JudgeHandler):
         super(DjangoJudgeHandler, self).on_compile_error(packet)
 
         if Submission.objects.filter(id=packet['submission-id']).update(status='CE', result='CE', error=packet['log']):
-            event.post('sub_%d' % packet['submission-id'], {
+            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {
                 'type': 'compile-error',
                 'log': packet['log']
             })
@@ -277,7 +269,7 @@ class DjangoJudgeHandler(JudgeHandler):
         super(DjangoJudgeHandler, self).on_compile_message(packet)
 
         if Submission.objects.filter(id=packet['submission-id']).update(error=packet['log']):
-            event.post('sub_%d' % packet['submission-id'], {'type': 'compile-message'})
+            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'compile-message'})
             json_log.info(self._make_json_log(packet, action='compile-message', log=packet['log']))
         else:
             logger.warning('Unknown submission: %d', packet['submission-id'])
@@ -289,7 +281,7 @@ class DjangoJudgeHandler(JudgeHandler):
 
         id = packet['submission-id']
         if Submission.objects.filter(id=id).update(status='IE', result='IE', error=packet['message']):
-            event.post('sub_%d' % id, {'type': 'internal-error'})
+            event.post('sub_%s' % Submission.get_id_secret(id), {'type': 'internal-error'})
             self._post_update_submission(id, 'internal-error', done=True)
             json_log.info(self._make_json_log(packet, action='internal-error', message=packet['message'],
                                               finish=True, result='IE'))
@@ -302,7 +294,7 @@ class DjangoJudgeHandler(JudgeHandler):
         super(DjangoJudgeHandler, self).on_submission_terminated(packet)
 
         if Submission.objects.filter(id=packet['submission-id']).update(status='AB', result='AB'):
-            event.post('sub_%d' % packet['submission-id'], {'type': 'aborted-submission'})
+            event.post('sub_%s' % Submission.get_id_secret(packet['submission-id']), {'type': 'aborted-submission'})
             self._post_update_submission(packet['submission-id'], 'terminated', done=True)
             json_log.info(self._make_json_log(packet, action='aborted', finish=True, result='AB'))
         else:
@@ -350,15 +342,16 @@ class DjangoJudgeHandler(JudgeHandler):
         test_case.points = packet['points']
         test_case.total = packet['total-points']
         test_case.batch = self.batch_id if self.in_batch else None
-        test_case.feedback = (packet.get('feedback', None) or '')[:max_feedback]
+        test_case.feedback = (packet.get('feedback') or '')[:max_feedback]
+        test_case.extended_feedback = packet.get('extended-feedback') or ''
         test_case.output = packet['output']
         test_case.save()
 
         json_log.info(self._make_json_log(
             packet, action='test-case', case=test_case.case, batch=test_case.batch,
             time=test_case.time, memory=test_case.memory, feedback=test_case.feedback,
-            output=test_case.output, points=test_case.points, total=test_case.total,
-            status=test_case.status
+            extended_feedback=test_case.extended_feedback, output=test_case.output,
+            points=test_case.points, total=test_case.total, status=test_case.status
         ))
 
         do_post = True
@@ -376,7 +369,7 @@ class DjangoJudgeHandler(JudgeHandler):
             self.update_counter[id] = (1, TIMER())
 
         if do_post:
-            event.post('sub_%d' % id, {
+            event.post('sub_%s' % Submission.get_id_secret(id), {
                 'type': 'test-case',
                 'id': packet['position'],
                 'status': test_case.status,

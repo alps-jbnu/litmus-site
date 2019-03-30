@@ -1,10 +1,12 @@
+import json
 from operator import attrgetter
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db.models import F, Prefetch
-from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -17,14 +19,14 @@ from django.views.generic import ListView, DetailView
 from judge import event_poster as event
 from judge.highlight_code import highlight_code
 from judge.models import Problem, Submission, Profile, Contest, ProblemTranslation, Language
-from judge.utils.problems import user_completed_ids, user_authored_ids, user_editable_ids, get_result_table
+from judge.utils.problems import get_result_data, user_completed_ids, user_authored_ids, user_editable_ids
 from judge.utils.raw_sql import use_straight_join
 from judge.utils.views import TitleMixin, DiggPaginatorMixin
 
 
 def submission_related(queryset):
     return queryset.select_related('user__user', 'problem', 'language') \
-        .only('id', 'user__user__username', 'user__name', 'user__display_rank', 'user__rating', 'problem__name',
+        .only('id', 'user__user__username', 'user__display_rank', 'user__rating', 'problem__name',
               'problem__code', 'problem__is_public', 'language__short_name', 'language__key', 'date', 'time', 'memory',
               'points', 'result', 'status', 'case_points', 'case_total', 'current_testcase')
 
@@ -39,15 +41,16 @@ class SubmissionDetailBase(LoginRequiredMixin, TitleMixin, SubmissionMixin, Deta
     def get_object(self, queryset=None):
         submission = super(SubmissionDetailBase, self).get_object(queryset)
         profile = self.request.user.profile
+        problem = submission.problem
         if self.request.user.has_perm('judge.view_all_submission'):
             return submission
         if submission.user_id == profile.id:
             return submission
-        if submission.problem.is_editor(profile):
+        if problem.is_editor(profile):
             return submission
-        if submission.problem.is_public or submission.problem.testers.filter(id=profile.id).exists():
-            if Submission.objects.filter(user_id=profile.id, result='AC', problem__code=submission.problem.code,
-                                         points=F('problem__points')).exists():
+        if problem.is_public or problem.testers.filter(id=profile.id).exists():
+            if Submission.objects.filter(user_id=profile.id, result='AC', problem_id=problem.id,
+                                         points=problem.points).exists():
                 return submission
         raise PermissionDenied()
 
@@ -143,8 +146,8 @@ class SubmissionSourceRaw(SubmissionSource):
 @require_POST
 def abort_submission(request, submission):
     submission = get_object_or_404(Submission, id=int(submission))
-    if (not request.user.is_authenticated or
-                    request.user.profile != submission.user and not request.user.has_perm('abort_any_submission')):
+    if (not request.user.is_authenticated or (submission.was_rejudged or
+            (request.user.profile != submission.user)) and not request.user.has_perm('abort_any_submission')):
         raise PermissionDenied()
     submission.abort()
     return HttpResponseRedirect(reverse('submission_status', args=(submission.id,)))
@@ -161,8 +164,14 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
     context_object_name = 'submissions'
     first_page_href = None
 
-    def get_result_table(self):
-        return get_result_table(self.get_queryset().order_by())
+    def get_result_data(self):
+        result = self._get_result_data()
+        for category in result['categories']:
+            category['name'] = _(category['name'])
+        return result
+
+    def _get_result_data(self):
+        return get_result_data(self.get_queryset().order_by())
 
     def access_check(self, request):
         pass
@@ -184,10 +193,18 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
                                                           queryset=ProblemTranslation.objects.filter(
                                                               language=self.request.LANGUAGE_CODE), to_attr='_trans'))
         if self.in_contest:
-            return queryset.filter(contest__participation__contest_id=self.contest.id)
+            queryset = queryset.filter(contest__participation__contest_id=self.contest.id)
+            if self.contest.hide_scoreboard and self.contest.is_in_contest(self.request):
+                queryset = queryset.filter(contest__participation__user=self.request.user.profile)
+            return queryset
         else:
             queryset = queryset.select_related('contest__participation__contest') \
                 .defer('contest__participation__contest__description')
+
+            # This is not technically correct since contest organizers *should* see these, but
+            # the join would be far too messy
+            if not self.request.user.has_perm('judge.see_private_contest'):
+                queryset = queryset.exclude(contest__participation__contest__hide_scoreboard=True)
 
         if self.selected_languages:
             queryset = queryset.filter(language_id__in=Language.objects.filter(key__in=self.selected_languages))
@@ -229,7 +246,7 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         context['all_statuses'] = self.get_searchable_status_codes()
         context['selected_statuses'] = self.selected_statuses
 
-        context['results'] = self.get_result_table()
+        context['results_json'] = mark_safe(json.dumps(self.get_result_data()))
 
         context['page_suffix'] = suffix = ('?' + self.request.GET.urlencode()) if self.request.GET else ''
         context['first_page_href'] = (self.first_page_href or '.') + suffix
@@ -247,7 +264,7 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         self.selected_statuses = set(request.GET.getlist('status'))
 
         if 'results' in request.GET:
-            return render(request, 'problem/statistics-table.html', {'results': self.get_result_table()})
+            return JsonResponse(self.get_result_data())
 
         return super(SubmissionsListBase, self).get(request, *args, **kwargs)
 
@@ -302,6 +319,7 @@ class AllUserSubmissions(ConditionalUserTabMixin, UserMixin, SubmissionsListBase
 class ProblemSubmissionsBase(SubmissionsListBase):
     show_problem = False
     dynamic_update = True
+    check_contest_in_access_check = True
 
     def get_queryset(self):
         if self.in_contest and not self.contest.contest_problems.filter(problem_id=self.problem.id).exists():
@@ -315,18 +333,16 @@ class ProblemSubmissionsBase(SubmissionsListBase):
         return format_html(u'All submissions for <a href="{1}">{0}</a>', self.problem_name,
                            reverse('problem_detail', args=[self.problem.code]))
 
-    def access_check(self, request):
-        if not self.problem.is_public:
-            user = request.user
-            if not user.is_authenticated:
-                raise Http404()
-            if self.problem.is_editor(user.profile) or self.problem.testers.filter(id=user.profile.id).exists():
-                return
-            if user.has_perm('judge.see_private_problem'):
-                return
-            if self.in_contest and self.contest.problems.filter(id=self.problem.id).exists():
-                return
+    def access_check_contest(self, request):
+        if self.in_contest and not self.contest.can_see_scoreboard(request):
             raise Http404()
+
+    def access_check(self, request):
+        if not self.problem.is_accessible_by(request.user):
+            raise Http404()
+
+        if self.check_contest_in_access_check:
+            self.access_check_contest(request)
 
     def get(self, request, *args, **kwargs):
         if 'problem' not in kwargs:
@@ -356,11 +372,23 @@ class ProblemSubmissions(ProblemSubmissionsBase):
 
 
 class UserProblemSubmissions(ConditionalUserTabMixin, UserMixin, ProblemSubmissions):
+    check_contest_in_access_check = False
+
+    @cached_property
+    def is_own(self):
+        return self.request.user.is_authenticated and self.request.user.profile == self.profile
+
+    def access_check(self, request):
+        super(UserProblemSubmissions, self).access_check(request)
+
+        if not self.is_own:
+            self.access_check_contest(request)
+
     def get_queryset(self):
         return super(UserProblemSubmissions, self).get_queryset().filter(user_id=self.profile.id)
 
     def get_title(self):
-        if self.request.user.is_authenticated and self.request.user.profile == self.profile:
+        if self.is_own:
             return _("My submissions for %(problem)s") % {'problem': self.problem_name}
         return _("%(user)s's submissions for %(problem)s") % {'user': self.username, 'problem': self.problem_name}
 
@@ -380,8 +408,13 @@ class UserProblemSubmissions(ConditionalUserTabMixin, UserMixin, ProblemSubmissi
 
 
 def single_submission(request, submission_id, show_problem=True):
+    request.no_profile_update = True
     authenticated = request.user.is_authenticated
     submission = get_object_or_404(submission_related(Submission.objects.all()), id=int(submission_id))
+
+    if not submission.problem.is_accessible_by(request.user):
+        raise Http404()
+
     return render(request, 'submission/row.html', {
         'submission': submission,
         'authored_problem_ids': user_authored_ids(request.user.profile) if authenticated else [],
@@ -394,6 +427,7 @@ def single_submission(request, submission_id, show_problem=True):
 
 
 def single_submission_query(request):
+    request.no_profile_update = True
     if 'id' not in request.GET or not request.GET['id'].isdigit():
         return HttpResponseBadRequest()
     try:
@@ -404,6 +438,8 @@ def single_submission_query(request):
 
 
 class AllSubmissions(SubmissionsListBase):
+    stats_update_interval = 3600
+
     def get_my_submissions_page(self):
         if self.request.user.is_authenticated:
             return reverse('all_user_submissions', kwargs={'user': self.request.user.username})
@@ -412,7 +448,20 @@ class AllSubmissions(SubmissionsListBase):
         context = super(AllSubmissions, self).get_context_data(**kwargs)
         context['dynamic_update'] = context['page_obj'].number == 1
         context['last_msg'] = event.last()
+        context['stats_update_interval'] = self.stats_update_interval
         return context
+
+    def _get_result_data(self):
+        if self.in_contest or self.selected_languages or self.selected_statuses:
+            return super(AllSubmissions, self)._get_result_data()
+
+        key = 'global_submission_result_data'
+        result = cache.get(key)
+        if result:
+            return result
+        result = super(AllSubmissions, self)._get_result_data()
+        cache.set(key, result, self.stats_update_interval)
+        return result
 
 
 class ForceContestMixin(object):
@@ -425,6 +474,8 @@ class ForceContestMixin(object):
         return self._contest
 
     def access_check(self, request):
+        super(ForceContestMixin, self).access_check(request)
+
         if not request.user.has_perm('judge.see_private_contest'):
             if not self.contest.is_public:
                 raise Http404()

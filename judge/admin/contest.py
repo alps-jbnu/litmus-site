@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.conf.urls import url
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import transaction, connection
@@ -11,7 +12,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ungettext
 from reversion.admin import VersionAdmin
 
-from judge.models import Contest, ContestProblem, Profile, Rating
+from judge.models import Contest, ContestProblem, ContestSubmission, Profile, Rating
 from judge.ratings import rate_contest
 from judge.utils.generator import make_key, GenerateRandomFruitTextInput
 from judge.widgets import HeavySelect2Widget, HeavySelect2MultipleWidget, AdminPagedownWidget, Select2MultipleWidget, \
@@ -69,8 +70,18 @@ class ContestProblemInline(admin.TabularInline):
     model = ContestProblem
     verbose_name = _('Problem')
     verbose_name_plural = 'Problems'
-    fields = ('problem', 'points', 'partial', 'is_pretested', 'max_submissions', 'order')
+    fields = ('problem', 'points', 'partial', 'is_pretested', 'max_submissions', 'output_prefix_override', 'order',
+              'rejudge_column')
+    readonly_fields = ('rejudge_column',)
     form = ContestProblemInlineForm
+
+    def rejudge_column(self, obj):
+        if obj.id is None:
+            return ''
+        return '<a class="button rejudge-link" href="%s">Rejudge</a>' % reverse('admin:judge_contest_rejudge',
+                                                                                args=(obj.contest.id, obj.id))
+    rejudge_column.short_description = ''
+    rejudge_column.allow_tags = True
 
 
 def today():
@@ -90,14 +101,19 @@ class ContestForm(ModelForm):
         self.fields['key'].initial = make_key()
         self.fields['start_time'].initial = today()
         self.fields['end_time'].initial = days_hence()
+        self.fields['banned_users'].widget.can_add_related = False
 
+    def clean(self):
+        cleaned_data = super(ContestForm, self).clean()
+        cleaned_data['banned_users'].filter(current_contest__contest=self.instance).update(current_contest=None)
 
     class Meta:
         widgets = {
             'organizers': HeavySelect2MultipleWidget(data_view='profile_select2'),
             'organizations': HeavySelect2MultipleWidget(data_view='organization_select2'),
             'tags': Select2MultipleWidget,
-            'access_code': GenerateRandomFruitTextInput
+            'access_code': GenerateRandomFruitTextInput,
+            'banned_users': HeavySelect2MultipleWidget(data_view='profile_select2', attrs={'style': 'width: 100%'}),
         }
 
         if SummernoteWidget is not None:
@@ -109,9 +125,12 @@ class ContestAdmin(VersionAdmin):
         (None, {'fields': ('key', 'name', 'organizers', 'is_public', 'use_clarifications',
                            'hide_problem_tags', 'run_pretests_only', 'use_balloons')}),
         (_('Scheduling'), {'fields': ('start_time', 'end_time', 'time_limit')}),
+        (_('Details'), {'fields': ('description', 'og_image', 'logo_override_image','tags', 'summary')}),
         # (_('Rating'), {'fields': ('is_rated', 'rate_all', 'rate_exclude')}),
-        (_('Organization'), {'fields': ('is_private', 'organizations', 'access_code')}),
-        (_('Details'), {'fields': ('description', 'og_image', 'tags', 'summary')}),
+        (_('Organization'), {'fields': ('is_private', 'organizations', 'access_code',
+                                        'hide_problem_tags', 'hide_scoreboard', 'run_pretests_only')}),
+        (_('Format'), {'fields': ('format_name', 'format_config')}),
+        (_('Justice'), {'fields': ('banned_users',)}),
     )
     list_display = ('key', 'name', 'is_public', 'is_rated', 'start_time', 'end_time', 'time_limit', 'user_count')
     actions = ['make_public', 'make_private']
@@ -161,7 +180,29 @@ class ContestAdmin(VersionAdmin):
 
     def get_urls(self):
         return [url(r'^rate/all/$', self.rate_all_view, name='judge_contest_rate_all'),
-                url(r'^(\d+)/rate/$', self.rate_view, name='judge_contest_rate')] + super(ContestAdmin, self).get_urls()
+                url(r'^(\d+)/rate/$', self.rate_view, name='judge_contest_rate'),
+                url(r'^(\d+)/judge/(\d+)/$', self.rejudge_view, name='judge_contest_rejudge')] + super(ContestAdmin, self).get_urls()
+
+    def rejudge_view(self, request, contest_id, problem_id):
+        if not request.user.has_perm('judge.rejudge_submission'):
+            self.message_user(request, ugettext('You do not have the permission to rejudge submissions.'),
+                              level=messages.ERROR)
+            return
+
+        queryset = ContestSubmission.objects.filter(problem_id=problem_id).select_related('submission')
+        if not request.user.has_perm('judge.rejudge_submission_lot') and \
+                len(queryset) > getattr(settings, 'REJUDGE_SUBMISSION_LIMIT', 10):
+            self.message_user(request, ugettext('You do not have the permission to rejudge THAT many submissions.'),
+                              level=messages.ERROR)
+            return
+
+        for model in queryset:
+            model.submission.judge(rejudge=True)
+
+        self.message_user(request, ungettext('%d submission were successfully scheduled for rejudging.',
+                                             '%d submissions were successfully scheduled for rejudging.',
+                                             len(queryset)) % len(queryset))
+        return HttpResponseRedirect(reverse('admin:judge_contest_change', args=(contest_id,)))
 
     def rate_all_view(self, request):
         if not request.user.has_perm('judge.contest_rating'):
@@ -213,39 +254,30 @@ class ContestParticipationForm(ModelForm):
 class ContestParticipationAdmin(admin.ModelAdmin):
     fields = ('contest', 'user', 'real_start', 'virtual')
     list_display = ('contest', 'username', 'show_virtual', 'real_start', 'score', 'cumtime')
-    actions = ['recalculate_points', 'recalculate_cumtime']
+    actions = ['recalculate_results']
     actions_on_bottom = actions_on_top = True
-    search_fields = ('contest__key', 'contest__name', 'user__user__username', 'user__name')
+    search_fields = ('contest__key', 'contest__name', 'user__user__username')
     form = ContestParticipationForm
     date_hierarchy = 'real_start'
 
     def get_queryset(self, request):
         return super(ContestParticipationAdmin, self).get_queryset(request).only(
-            'contest__name', 'user__user__username', 'user__name', 'real_start', 'score', 'cumtime', 'virtual'
+            'contest__name', 'contest__format_name', 'contest__format_config',
+            'user__user__username', 'real_start', 'score', 'cumtime', 'virtual'
         )
 
-    def recalculate_points(self, request, queryset):
+    def recalculate_results(self, request, queryset):
         count = 0
         for participation in queryset:
-            participation.recalculate_score()
+            participation.recompute_results()
             count += 1
-        self.message_user(request, ungettext('%d participation have scores recalculated.',
-                                             '%d participations have scores recalculated.',
+        self.message_user(request, ungettext('%d participation recalculated.',
+                                             '%d participations recalculated.',
                                              count) % count)
-    recalculate_points.short_description = _('Recalculate scores')
-
-    def recalculate_cumtime(self, request, queryset):
-        count = 0
-        for participation in queryset:
-            participation.update_cumtime()
-            count += 1
-        self.message_user(request, ungettext('%d participation have times recalculated.',
-                                             '%d participations have times recalculated.',
-                                             count) % count)
-    recalculate_cumtime.short_description = _('Recalculate cumulative time')
+    recalculate_results.short_description = _('Recalculate results')
 
     def username(self, obj):
-        return obj.user.long_display_name
+        return obj.user.username
     username.short_description = _('username')
     username.admin_order_field = 'user__user__username'
 

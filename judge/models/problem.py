@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from judge.fulltext import SearchQuerySet
-from judge.models.profile import Profile
+from judge.models.profile import Profile, Organization
 from judge.models.runtime import Language
 from judge.user_translations import ugettext as user_ugettext
 from judge.utils.raw_sql import unique_together_left_join, RawSQLColumn
@@ -121,17 +121,21 @@ class Problem(models.Model):
     date = models.DateTimeField(verbose_name=_('date of publishing'), null=True, blank=True, db_index=True,
                                 help_text=_("Doesn't have magic ability to auto-publish due to backward compatibility"))
     banned_users = models.ManyToManyField(Profile, verbose_name=_('personae non gratae'), blank=True,
-                                          help_text=_('Bans the selected users from submitting to this problem'))
+                                          help_text=_('Bans the selected users from submitting to this problem.'))
     license = models.ForeignKey(License, null=True, blank=True, on_delete=models.SET_NULL)
     og_image = models.CharField(verbose_name=_('OpenGraph image'), max_length=150, blank=True)
     summary = models.TextField(blank=True, verbose_name=_('problem summary'),
                                help_text=_('Plain-text, shown in meta description tag, e.g. for social media.'))
-    user_count = models.IntegerField(verbose_name=_('amount of users'), default=0,
-                                     help_text=_('The amount of users on the best solutions page.'))
-    ac_rate = models.FloatField(verbose_name=_('rate of AC submissions'), default=0)
+    user_count = models.IntegerField(verbose_name=_('number of users'), default=0,
+                                     help_text=_('The number of users who solved the problem.'))
+    ac_rate = models.FloatField(verbose_name=_('solve rate'), default=0)
 
     objects = TranslatedProblemQuerySet.as_manager()
     tickets = GenericRelation('Ticket')
+
+    organizations = models.ManyToManyField(Organization, blank=True, verbose_name=_('organizations'),
+                                          help_text=_('If private, only these organizations may see the problem.'))
+    is_organization_private = models.BooleanField(verbose_name=_('private to organizations'), default=False)
 
     def __init__(self, *args, **kwargs):
         super(Problem, self).__init__(*args, **kwargs)
@@ -157,26 +161,37 @@ class Problem(models.Model):
         return self.is_editor(user.profile)
 
     def is_accessible_by(self, user):
-        # All users can see public problems
+        # Problem is public.
         if self.is_public:
-            return True
+            # Contest is not private to an organization.
+            if not self.is_organization_private:
+                return True
 
-        # If the user can view all problems
+            # If the user can see all organization private problems.
+            if user.has_perm('judge.see_organization_problems'):
+                return True
+
+            # If the user is in the organization.
+            if user.is_authenticated and \
+               self.organizations.filter(id__in=user.profile.organizations.all()):
+                return True
+
+        # If the user can view all problems.
         if user.has_perm('judge.see_private_problem'):
-            return True
-
-        # If the user authored the problem or is a curator
-        if user.has_perm('judge.edit_own_problem') and self.is_editor(user.profile):
             return True
 
         if not user.is_authenticated:
             return False
 
-        # If user is a tester
+        # If the user authored the problem or is a curator.
+        if user.has_perm('judge.edit_own_problem') and self.is_editor(user.profile):
+            return True
+
+        # If user is a tester.
         if self.testers.filter(id=user.profile.id).exists():
             return True
 
-        # If user is currently in a contest containing that problem
+        # If user is currently in a contest containing that problem.
         current = user.profile.current_contest_id
         if current is None:
             return False
@@ -235,16 +250,17 @@ class Problem(models.Model):
         return ProblemClarification.objects.filter(problem=self)
 
     def update_stats(self):
-        self.user_count = self.submission_set.filter(points__gt=0).values('user').distinct().count()
+        self.user_count = self.submission_set.filter(points__gte=self.points, result='AC', user__is_unlisted=False).values('user').distinct().count()
         submissions = self.submission_set.count()
-        self.ac_rate = 100.0 * self.submission_set.filter(result='AC').count() / submissions if submissions else 0
+        self.ac_rate = 100.0 * self.submission_set.filter(points__gte=self.points, result='AC', user__is_unlisted=False).count() / submissions if submissions else 0
         self.save()
 
     update_stats.alters_data = True
 
     def _get_limits(self, key):
+        global_limit = getattr(self, key)
         limits = {limit['language_id']: (limit['language__name'], limit[key])
-                  for limit in self.language_limits.values('language_id', 'language__name', key)}
+                  for limit in self.language_limits.values('language_id', 'language__name', key) if limit[key] != global_limit}
         limit_ids = set(limits.keys())
         common = []
 
@@ -302,6 +318,7 @@ class Problem(models.Model):
             ('clone_problem', 'Clone problem'),
             ('change_public_visibility', 'Change is_public field'),
             ('change_manually_managed', 'Change is_manually_managed field'),
+            ('see_organization_problem', 'See organization-private problems'),
         )
         verbose_name = _('problem')
         verbose_name_plural = _('problems')

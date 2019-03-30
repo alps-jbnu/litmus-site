@@ -10,6 +10,10 @@
             color: #777;
             padding-top: 0.5em;
         }
+
+        .content-description ul {
+            padding: 0 !important;
+        }
     </style>
 {% endblock %}
 
@@ -21,7 +25,7 @@
                 count_down($(this));
             });
 
-            $('.contest-tag').find('a').featherlight();
+            $('.contest-tag').find('a[data-featherlight]').featherlight();
 
             $('.join-warning').click(function () {
                 return confirm('{{ _('Are you sure you want to join?') }}\n' +
@@ -72,11 +76,29 @@
         {% if contest.is_private %}
         <span class="ui icon label">
             <i class="fa fa-lock"></i>
-            <span class="detail">사설</span>
         </span>
         {% endif %}
 
         <span class="contest-tags">
+            {% if not contest.is_public %}
+                <span style="background-color: #000000; color: #ffffff" class="contest-tag">
+                    <i class="fa fa-eye-slash"></i> {{ _('private') }}
+                </span>
+            {% endif %}
+            {% if contest.is_private %}
+                {% for org in contest.organizations.all() %}
+                    <span style="background-color: #cccccc" class="contest-tag">
+                        <a href="{{ org.get_absolute_url() }}" style="color: #000000">
+                            <i class="fa fa-lock"></i> {{ org.name }}
+                        </a>
+                    </span>
+                {% endfor %}
+            {% endif %}
+            {% if contest.is_rated %}
+                <span style="background-color: #e54c14; color: #ffffff" class="contest-tag">
+                    <i class="fa fa-bar-chart"></i> {{ _('rated') }}
+                </span>
+            {% endif %}
             {% for tag in contest.tags.all() %}
                 <a class="ui label" style="margin: 0 5px; background-color: {{ tag.color }}; color: {{ tag.text_color }};" href="{{ url('contest_tag', tag.name) }}"
                        data-featherlight="{{ url('contest_tag_ajax', tag.name) }}">
@@ -104,8 +126,78 @@
     </div>
 {% endmacro %}
 
+{% macro user_count(contest, user) %}
+    {% if contest.show_scoreboard or contest.can_see_scoreboard(request) %}
+        <a href="{{ url('contest_ranking', contest.key) }}">{{ contest.user_count }}</a>
+    {% else %}
+        {{ contest.user_count }}
+    {% endif %}
+{% endmacro %}
+
+{% macro contest_join(contest, request) %}
+    {% if not request.in_contest %}
+        <td>
+            {% if request.profile in contest.organizers.all() %}
+                <form action="{{ url('contest_join', contest.key) }}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" class="unselectable button full participate-button"
+                           value="{{ _('Spectate') }}">
+                </form>
+            {% else %}
+                <form action="{{ url('contest_join', contest.key) }}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" class="unselectable button full participate-button join-warning"
+                           value="{{ _('Join') }}">
+                </form>
+            {% endif %}
+        </td>
+    {% endif %}
+{% endmacro %}
+
 {% block body %}
     <div class="content-description">
+        {% if active_participations %}
+            <h4>{{ _('Active Contests') }}</h4>
+            <table class="contest-list table striped">
+                <thead>
+                <tr>
+                    <th style="width:90%">{{ _('Contest') }}</th>
+                    <th>{{ _('Users') }}</th>
+                    {% if not request.in_contest %}
+                        <th style="width:15%"></th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for participation in active_participations %}
+                    {% with contest=participation.contest %}
+                        <tr>
+                            <td>
+                                <div class="contest-block">
+                                    {{ contest_head(contest) }}
+                                    {% if contest.start_time %}
+                                        <br>
+                                        {% if contest.time_limit %}
+                                            <span class="time">{{ _('Window ends in %(countdown)s', countdown=participation.time_remaining|as_countdown)}}
+                                        {% elif contest.time_before_end %}
+                                            <span class="time">{{ _('Ends in %(countdown)s', countdown=contest.time_before_end|as_countdown) }}</span>
+                                        {% endif %}
+                                        {{ time_left(contest) }}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {{ user_count(contest, request.user) }}
+                            </td>
+                            {{ contest_join(contest, request) }}
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <br>
+        {% endif %}
+
         {% if current_contests %}
             <h3><i class="fa fa-fw fa-trophy"></i> {{ _('Ongoing Contests') }}</h3>
             <table class="ui celled padded striped table">
@@ -124,13 +216,12 @@
                                     <br>
                                     {% if contest.time_before_end %}
                                         <span class="time">{{ _('Ends in %(countdown)s', countdown=contest.time_before_end|as_countdown) }}</span>
-                                    {% elif contest.free_start and contest.start_time %}
-                                        <span class="time">{{ _('Started at %(time)s', time=contest.start_time|date(_("N j, Y, G:i"))) }}</span>
                                     {% endif %}
                                     {{ time_left(contest) }}
                                 {% endif %}
                             </div>
                         </td>
+<<<<<<< HEAD
                         {% if not request.in_contest %}
                             <td style="width: 15%; vertical-align: middle;">
                                 {% if request.user.profile in contest.organizers.all() %}
@@ -144,6 +235,12 @@
                                 {% endif %}
                             </td>
                         {% endif %}
+=======
+                        <td>
+                            {{ user_count(contest, request.user) }}
+                        </td>
+                        {{ contest_join(contest, request) }}
+>>>>>>> 0111ee1fe7d5066bebd6e822b4ee0cee123bc8a8
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -159,7 +256,8 @@
                     <th>{{ _('Contest') }}</th>
                 </tr>
                 </thead>
-                <tbody>{% for contest in future_contests %}
+                <tbody>
+                {% for contest in future_contests %}
                     <tr>
                         <td>
                             <div class="contest-block">
@@ -183,6 +281,7 @@
         {% endif %}
         <br>
 
+<<<<<<< HEAD
         <h3>{{ _('Past Contests') }}</h3>
         <table class="ui padded celled striped table">
             <thead>
@@ -204,10 +303,53 @@
                             <a href="{{ url('contest_join', contest.key) }}"
                                class="ui teal fluid button">{{ _('Virtual join') }}</a>
                         </td>
+=======
+        {% if past_contests %}
+            <h4>{{ _('Past Contests') }}</h4>
+            {% if page_obj and page_obj.num_pages > 1 %}
+                <div style="margin-bottom: 4px;">
+                    {% include "list-pages.html" %}
+                </div>
+            {% endif %}
+            <table class="contest-list table striped">
+                <thead>
+                <tr>
+                    <th style="width:90%">{{ _('Contest') }}</th>
+                    <th>{{ _('Users') }}</th>
+                    {% if not request.in_contest %}
+                        <th style="width:15%"></th>
+>>>>>>> 0111ee1fe7d5066bebd6e822b4ee0cee123bc8a8
                     {% endif %}
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {% for contest in past_contests %}
+                    <tr>
+                        <td>
+                            <div class="contest-block">
+                                {{ contest_head(contest) }}
+                                {{ time_left(contest) }}
+                            </div>
+                        </td>
+                        <td>
+                            {{ user_count(contest, request.user) }}
+                        </td>
+                        {% if not request.in_contest %}
+                            <td><form action="{{ url('contest_join', contest.key) }}" method="post">
+                                    {% csrf_token %}
+                                    <input type="submit" class="unselectable button full participate-button"
+                                           value="{{ _('Virtual join') }}">
+                            </form></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% if page_obj and page_obj.num_pages > 1 %}
+                <div style="margin-top: 10px;">
+                    {% include "list-pages.html" %}
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 {% endblock %}

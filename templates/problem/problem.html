@@ -32,6 +32,19 @@
         * { font-size: 97%; }
 		p { margin-bottom: 0; }
         #content, #problem-title, .condition.table { margin-top: 0 !important; }
+
+        #content-right {
+            max-width: 12.5em;
+            min-width: 12.5em;
+        }
+
+        #problem-types, #allowed-langs, #available-judges {
+            padding-top: 1em;
+        }
+
+        .problem-info-entry {
+            padding-top: 0.5em;
+        }
     </style>
 {% endblock %}
 
@@ -122,7 +135,8 @@
             {{ _('Submit solution') }}
         </a>
     {% endif %}
-    <hr>
+
+    <hr style="padding-bottom: 0.3em">
 
     {% if request.user.is_authenticated and has_submissions %}
         <div>
@@ -146,6 +160,13 @@
         {% if not problem.is_manually_managed %}
             <div><a href="{{ url('problem_data', problem.code) }}">{{ _('Edit test data') }}</a></div>
         {% endif %}
+    {% elif request.user.is_authenticated and has_tickets %}
+        <hr>
+        <div>
+            <a href="{{ url('problem_ticket_list', problem.code) }}">{{ _('My tickets') }}
+                {% if num_open_tickets %}<span class="badge">{{ num_open_tickets }}</span>{% endif %}
+            </a>
+        </div>
     {% endif %}
 
     {% if perms.judge.clone_problem %}
@@ -156,8 +177,46 @@
             </form>
         </div>
     {% endif %}
-    <hr>
-    <br>
+
+    <hr style="padding-top: 0.3em">
+
+    <div class="problem-info-entry">
+        <i class="fa fa-check fa-fw"></i><span class="pi-name">{{ _('Points:') }}</span>
+        <span class="pi-value">
+            {% if contest_problem %}
+                {{ contest_problem.points }}{% if contest_problem.partial %} {{ _('(partial)') }}{% endif %}
+            {% else %}
+                {{ problem.points|floatformat }}{% if problem.partial %} {{ _('(partial)') }}{% endif %}
+            {% endif %}
+        </span>
+    </div>
+    <div class="problem-info-entry">
+        <i class="fa fa-clock-o fa-fw"></i><span class="pi-name">{{ _('Time limit:') }}</span>
+        <span class="pi-value">{{ problem.time_limit }}s</span>
+    </div>
+    <div class="problem-lang-limits">
+        {% for name, limit in problem.language_time_limit %}
+            <div class="lang-limit">
+                <span class="lang-name">{{ name }}</span>
+                <span class="lang-tl">{{ limit }}s</span>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="problem-info-entry">
+        <i class="fa fa-server fa-fw"></i><span class="pi-name">{{ _('Memory limit:') }}</span>
+        <span class="pi-value">{{ problem.memory_limit|kbsimpleformat }}</span>
+    </div>
+    <div class="problem-lang-limits">
+        {% for name, limit in problem.language_memory_limit %}
+            <div class="lang-limit">
+                <span class="lang-name">{{ name }}</span>
+                <span class="lang-ml">{{ limit|kbsimpleformat }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <hr style="padding-top: 0.7em">
+
     {% cache 86400 'problem_authors' problem.id LANGUAGE_CODE %}
         {% with authors=problem.authors.all() %}
             {% if authors %}
@@ -173,7 +232,7 @@
             {% endif %}
         {% endwith %}
     {% endcache %}
-    <br>
+
     {% if not contest_problem or not contest_problem.contest.hide_problem_tags %}
         <div id="problem-types">
             {% with types=problem.types_list %}
@@ -191,28 +250,52 @@
                 </div>
             {% endwith %}
         </div>
-        <br>
     {% endif %}
     {% if show_languages %}
         <div id="allowed-langs">
             <div class="toggle open unselectable">
                 <i class="fa fa-chevron-right fa-fw"></i>{{ _('Allowed languages') }}
             </div>
-            <div style="margin-bottom:-1em" class="toggled">
+            <div class="toggled">
                 {% with usable=problem.usable_common_names, langs=problem.languages_list() %}
                     {% for lang in langs %}
-                        {% if lang in usable %}
+                        {%- if lang in usable -%}
                             <span class="ui green basic label" style="margin-top: 5px;">{{ lang }}</span>
-                        {% else %}
+                        {%- else -%}
                             <span class="ui grey basic label" style="margin-top: 5px;">
                                 <strike data-tooltip="{{ _('No %(lang)s judge online', lang=lang) }}">{{ lang }}</strike>
                             </span>
-                        {% endif %}
+                        {%- endif -%}
+                        {% if not loop.last %}, {% endif -%}
                     {% endfor %}
                 {% endwith %}
             </div>
         </div>
-        <br>
+    {% endif %}
+    {% if problem.is_editable_by(request.user) %}
+        <div id="available-judges">
+            <i class="fa fa-database fa-fw"></i><span
+                class="pi-name">{% trans trimmed count=available_judges|length %}
+                Judge:
+                {% pluralize count %}
+                Judges:
+            {% endtrans %}
+            </span>
+            <div class="pi-value judges-value">
+                {% if available_judges %}
+                    {% if perms.judge.change_judge %}
+                        {% for judge in available_judges %}
+                            <a href="{{ url('admin:judge_judge_change', judge.id) }}">{{ judge.name }}</a>
+                            {%- if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {{ available_judges|join(", ") }}
+                    {% endif %}
+                {% else %}
+                    <i>{{ _('none available') }}</i>
+                {% endif %}
+            </div>
+        </div>
     {% endif %}
   </div>
 {% endblock %}
@@ -276,9 +359,9 @@
 {% endblock %}
 
 {% block post_description_end %}
-    {% if request.user.is_authenticated and not request.user.profile.mute %}
+    {% if request.user.is_authenticated and not request.profile.mute %}
         <a href="{{ url('new_problem_ticket', problem.code) }}" class="button clarify">
-            {%- if contest_problem and contest_problem.contest.use_clarifications -%}
+            {%- if contest_problem and contest_problem.contest.use_clarifications and request.profile.current_contest.live -%}
                 {{ _('Request clarification') }}
             {%- else -%}
                 {{ _('Report an issue') }}
@@ -297,7 +380,7 @@
                     <div class="problem-clarification">
                         <div class="time">{{ relative_time(clarification.date) }}</div>
                         <span class="body">
-                            {{ clarification.description|safe }}
+                            {{ clarification.description|markdown('problem', MATH_ENGINE)|reference }}
                         </span>
                     </div>
                 {% endfor %}

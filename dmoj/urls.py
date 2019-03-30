@@ -15,8 +15,9 @@ from judge.sitemap import ProblemSitemap, UserSitemap, HomePageSitemap, UrlSitem
     BlogPostSitemap, SolutionSitemap
 from judge.views import TitledTemplateView
 from judge.views import organization, language, status, blog, problem, mailgun, license, register, user, \
-    submission, widgets, comment, contests, api, ranked_submission, stats, preview, ticket, notification
-from judge.views.problem_data import ProblemDataView, problem_data_file, problem_init_view
+    submission, widgets, comment, contests, api, ranked_submission, stats, preview, ticket, totp, notification
+from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
+    problem_data_file, problem_init_view
 from judge.views.register import RegistrationView, ActivationView
 from judge.views.select2 import UserSelect2View, OrganizationSelect2View, ProblemSelect2View, CommentSelect2View, \
     ContestSelect2View, UserSearchSelect2View, ContestUserSearchSelect2View, TicketUserSelect2View, AssigneeSelect2View
@@ -74,6 +75,10 @@ register_patterns = [
         template_name='registration/password_reset_done.html',
     ), name='password_reset_done'),
     url(r'^social/error/$', register.social_auth_error, name='social_auth_error'),
+
+    url(r'^2fa/$', totp.TOTPLoginView.as_view(), name='login_2fa'),
+    url(r'^2fa/enable/$', totp.TOTPEnableView.as_view(), name='enable_2fa'),
+    url(r'^2fa/disable/$', totp.TOTPDisableView.as_view(), name='disable_2fa'),
 ]
 
 
@@ -117,6 +122,7 @@ urlpatterns = [
 
         url(r'^/test_data$', ProblemDataView.as_view(), name='problem_data'),
         url(r'^/test_data/init$', problem_init_view, name='problem_data_init'),
+        url(r'^/test_data/diff$', ProblemSubmissionDiff.as_view(), name='problem_submission_diff'),
         url(r'^/data/(?P<path>.+)$', problem_data_file, name='problem_data_file'),
 
         url(r'^/tickets$', ticket.ProblemTicketListView.as_view(), name='problem_ticket_list'),
@@ -168,7 +174,7 @@ urlpatterns = [
         url(r'^render$', comment.CommentContent.as_view(), name='comment_content'),
     ])),
 
-    url(r'^contests/$', contests.ContestList.as_view(), name='contest_list'),
+    url(r'^contests/', paged_list_view(contests.ContestList, 'contest_list')),
     url(r'^contests/(?P<year>\d+)/(?P<month>\d+)/$', contests.ContestCalendar.as_view(), name='contest_calendar'),
     url(r'^contests/tag/(?P<name>[a-z-]+)', include([
         url(r'^$', contests.ContestTagDetail.as_view(), name='contest_tag'),
@@ -195,7 +201,7 @@ urlpatterns = [
     ])),
 
     url(r'^organizations/$', organization.OrganizationList.as_view(), name='organization_list'),
-    url(r'^organization/(?P<key>\w+)', include([
+    url(r'^organization/(?P<pk>\d+)-(?P<slug>[\w-]*)', include([
         url(r'^$', organization.OrganizationHome.as_view(), name='organization_home'),
         url(r'^/users$', organization.OrganizationUsers.as_view(), name='organization_users'),
         url(r'^/join$', organization.JoinOrganization.as_view(), name='join_organization'),
@@ -204,7 +210,7 @@ urlpatterns = [
         url(r'^/kick$', organization.KickUserWidgetView.as_view(), name='organization_user_kick'),
 
         url(r'^/request$', organization.RequestJoinOrganization.as_view(), name='request_organization'),
-        url(r'^/request/(?P<pk>\d+)$', organization.OrganizationRequestDetail.as_view(),
+        url(r'^/request/(?P<rpk>\d+)$', organization.OrganizationRequestDetail.as_view(),
             name='request_organization_detail'),
         url(r'^/requests/', include([
             url(r'^pending$', organization.OrganizationRequestView.as_view(), name='organization_requests_pending'),
@@ -215,7 +221,7 @@ urlpatterns = [
                 name='organization_requests_rejected'),
         ])),
 
-        url(r'^/$', lambda _, key: HttpResponsePermanentRedirect(reverse('organization_home', args=[key]))),
+        url(r'^/$', lambda _, pk, slug: HttpResponsePermanentRedirect(reverse('organization_home', args=[pk, slug]))),
     ])),
 
     url(r'^runtimes/$', language.LanguageList.as_view(), name='runtime_list'),
@@ -230,9 +236,6 @@ urlpatterns = [
         url(r'^user/list$', api.api_v1_user_list),
         url(r'^user/info/(\w+)$', api.api_v1_user_info),
         url(r'^user/submissions/(\w+)$', api.api_v1_user_submissions),
-        url(r'^v2/', include([
-            url(r'user-info$', api.api_v2_user_info),
-        ])),
     ])),
 
     url(r'^blog/', paged_list_view(blog.PostList, 'blog_post_list')),

@@ -1,3 +1,7 @@
+import hashlib
+import hmac
+
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -115,6 +119,22 @@ class Submission(models.Model):
 
     abort.alters_data = True
 
+    def update_contest(self):
+        try:
+            contest = self.contest
+        except AttributeError:
+            return
+
+        contest_problem = contest.problem
+        contest.points = round(self.case_points / self.case_total * contest_problem.points
+                               if self.case_total > 0 else 0, 3)
+        if not contest_problem.partial and contest.points != contest_problem.points:
+            contest.points = 0
+        contest.save()
+        contest.participation.recompute_results()
+
+    update_contest.alters_data = True
+
     @property
     def is_graded(self):
         return self.status not in ('QU', 'P', 'G')
@@ -136,6 +156,15 @@ class Submission(models.Model):
             return self.contest
         except ObjectDoesNotExist:
             return None
+
+    @classmethod
+    def get_id_secret(cls, sub_id):
+        return (hmac.new(settings.EVENT_DAEMON_SUBMISSION_KEY, str(sub_id), hashlib.sha512).hexdigest()[:16] +
+                '%08x' % sub_id)
+
+    @cached_property
+    def id_secret(self):
+        return self.get_id_secret(self.id)
 
     class Meta:
         permissions = (
@@ -162,6 +191,7 @@ class SubmissionTestCase(models.Model):
     total = models.FloatField(verbose_name=_('points possible'), null=True)
     batch = models.IntegerField(verbose_name=_('batch number'), null=True)
     feedback = models.CharField(max_length=50, verbose_name=_('judging feedback'), blank=True)
+    extended_feedback = models.TextField(verbose_name=_('extended judging feedback'), blank=True)
     output = models.TextField(verbose_name=_('program output'), blank=True)
 
     @property

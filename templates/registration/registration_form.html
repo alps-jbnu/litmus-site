@@ -9,6 +9,10 @@
             padding-left: 1em;
             text-align: left;
         }
+
+        .pass-req {
+            padding: 0;
+        }
     </style>
 {% endblock %}
 
@@ -35,6 +39,24 @@
             <div class="ui error message" {% if form.errors %} style="display: block;" {% endif %}>
                 <p>{{ form.errors }}</p>
             </div>
+            <div style="display: none" class="pass-req alert alert-info">
+                <ul>
+                    {% for validator in password_validators %}
+                        <li>{{ validator.get_help_text() }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <span class="fullwidth{% if form.password1.errors %}-error{% endif %}">{{ form.password1 }}</span>
+            {% if form.password1.errors %}
+                <div class="form-field-error">{{ form.password1.errors }}</div>
+            {% endif %}
+            <div class="block-header">{{ _('Password') }}<sup style="font-size: 0.7em;padding-left: 0.2em;">2</sup>{# -#}
+                <small>{{ _('(again, for confirmation)') }}</small>
+            </div>
+            <span class="fullwidth{% if form.password2.errors %}-error{% endif %}">{{ form.password2 }}</span>
+            {% if form.password2.errors %}
+                <div class="form-field-error">{{ form.password2.errors }}</div>
+            {% endif %}
 
             <div class="ui stacked left aligned segment">
                 <div class="field {% if form.username.errors %}error{% endif %}">

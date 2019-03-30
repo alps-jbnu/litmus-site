@@ -32,7 +32,7 @@ class ContestSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return Contest.objects.filter(is_public=True).values_list('key')
+        return Contest.objects.filter(is_public=True, is_private=False).values_list('key')
 
     def location(self, obj):
         return reverse('contest_view', args=obj)
@@ -43,7 +43,7 @@ class OrganizationSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return Organization.objects.values_list('key')
+        return Organization.objects.values_list('id', 'slug')
 
     def location(self, obj):
         return reverse('organization_home', args=obj)

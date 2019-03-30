@@ -1,4 +1,5 @@
 .idea
+.vscode
 .sass-cache
 *.sqlite3
 *.py[co]
@@ -17,3 +18,10 @@ media/
 node_modules/
 uwsgi
 static/cache/
+
+# git mergetool (vimdiff)
+*.orig
+*_BACKUP_*
+*_REMOTE_*
+*_BASE_*
+*_LOCAL_*

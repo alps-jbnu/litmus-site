@@ -1,9 +1,18 @@
 $(function () {
     window.register_dmmd_preview = function ($preview) {
+        var $form = $preview.parents('form').first();
         var $update = $preview.find('.dmmd-preview-update');
         var $content = $preview.find('.dmmd-preview-content');
         var preview_url = $preview.attr('data-preview-url');
         var $textarea = $('#' + $preview.attr('data-textarea-id'));
+
+        // Submit the form if Ctrl+Enter is pressed in pagedown textarea.
+        $textarea.keydown(function (ev) {
+            // Ctrl+Enter pressed (metaKey used to support command key on mac).
+            if ((ev.metaKey || ev.ctrlKey) && ev.which == 13) {
+                $form.submit();
+            }
+        });
 
         $update.click(function () {
             var text = $textarea.val();
@@ -27,7 +36,7 @@ $(function () {
                                 success: function () {
                                     $.ajax({
                                         type: 'GET',
-                                        url: '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML',
+                                        url: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML',
                                         dataType: 'script',
                                         cache: true,
                                         success: function () {

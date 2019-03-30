@@ -14,7 +14,7 @@ PriorityMarker = namedtuple('PriorityMarker', 'priority')
 
 
 class JudgeList(object):
-    priorities = 2
+    priorities = 3
 
     def __init__(self):
         self.queue = dllist()
@@ -46,6 +46,11 @@ class JudgeList(object):
         with self.lock:
             self.judges.add(judge)
             self._handle_free_judge(judge)
+
+    def disconnect(self, judge_id, force=False):
+        for judge in self.judges:
+            if judge.name == judge_id:
+                judge.disconnect(force=force)
 
     def update_problems(self, judge):
         with self.lock:

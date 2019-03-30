@@ -148,16 +148,18 @@ MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'judge.middleware.DMOJLoginMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'judge.user_log.LogUserAccessMiddleware',
     'judge.timezone.TimezoneMiddleware',
+    'impersonate.middleware.ImpersonateMiddleware',
+    'judge.middleware.DMOJImpersonationMiddleware',
     'judge.middleware.ContestMiddleware',
     'judge.middleware.UserActivateMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'judge.social_auth.SocialAuthExceptionMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'impersonate.middleware.ImpersonateMiddleware',
 )
 
 IMPERSONATE_REQUIRE_SUPERUSER = True
@@ -173,7 +175,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'judge.utils.pwned.PwnedPasswordsValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
@@ -250,10 +252,12 @@ LANGUAGES = [
     ('es', _('Spanish')),
     ('fr', _('French')),
     ('hr', _('Croatian')),
+    ('hu', _('Hungarian')),
     ('ko', _('Korean')),
     ('ro', _('Romanian')),
     ('ru', _('Russian')),
     ('sr-latn', _('Serbian (Latin)')),
+    ('tr', _('Turkish')),
     ('vi', _('Vietnamese')),
     ('zh-hans', _('Simplified Chinese')),
 ]
@@ -276,7 +280,6 @@ MARKDOWN_USER_LARGE_STYLE = {
     'safe_mode': True,
     'nofollow': True,
     'use_camo': True,
-    'texoid': True,
     'math': True,
 }
 
@@ -318,6 +321,7 @@ EVENT_DAEMON_POST = 'ws://localhost:9997/'
 EVENT_DAEMON_GET = 'ws://localhost:9996/'
 EVENT_DAEMON_POLL = '/channels/'
 EVENT_DAEMON_KEY = None
+EVENT_DAEMON_SUBMISSION_KEY = '6Sdmkx^%pk@GsifDfXcwX*Y7LRF%RGT8vmFpSxFBT$fwS7trc8raWfN#CSfQuKApx&$B#Gh2L7p%W!Ww'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -382,6 +386,8 @@ SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 SOCIAL_AUTH_SLUGIFY_FUNCTION = 'judge.social_auth.slugify_username'
 
 JUDGE_AMQP_PATH = None
+
+MOSS_API_KEY = None
 
 try:
     with open(os.path.join(os.path.dirname(__file__), 'local_settings.py')) as f:

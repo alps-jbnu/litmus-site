@@ -6,7 +6,7 @@
 
   
   django.pluralidx = function(n) {
-    var v=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);
+    var v=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));
     if (typeof(v) == 'boolean') {
       return v ? 1 : 0;
     } else {
@@ -89,6 +89,7 @@
     "time format with day\u0004%d day %h:%m:%s": [
       "%d \uc77c %h\uc2dc\uac04 %m\ubd84 %s\ucd08", 
       "%d \uc77c %h\uc2dc\uac04 %m\ubd84 %s\ucd08", 
+      "", 
       "%d \u0434\u043d\u0435\u0439 %h:%m:%s"
     ], 
     "time format without day\u0004%h:%m:%s": "Text for Translation\n%h:%m:%s"

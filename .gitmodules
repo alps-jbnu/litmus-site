@@ -2,10 +2,12 @@
 	path = resources/pagedown
 	url = https://github.com/DMOJ/dmoj-pagedown.git
 	branch = master
+    ignore = dirty
 [submodule "resources/libs"]
 	path = resources/libs
 	url = https://github.com/DMOJ/site-assets.git
 	branch = master
+    ignore = dirty
 [submodule "static/semantic-ui"]
 	path = static/semantic-ui
 	url = https://github.com/Semantic-Org/Semantic-UI-CSS

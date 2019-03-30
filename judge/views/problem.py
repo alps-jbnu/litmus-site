@@ -31,14 +31,15 @@ from django.views.generic.detail import SingleObjectMixin
 from django_ace.widgets import ACE_URL
 from judge.comments import CommentedDetailView
 from judge.forms import ProblemSubmitForm
-from judge.models import Problem, Submission, ContestSubmission, ContestProblem, Language, ProblemGroup, Solution, \
-    ProblemTranslation, TranslatedProblemForeignKeyQuerySet, RuntimeVersion, ProblemType
+from judge.models import ContestSubmission, ContestProblem, Judge, Language, Problem, ProblemGroup, ProblemTranslation, \
+    ProblemType, RuntimeVersion, Solution, Submission, TranslatedProblemForeignKeyQuerySet
 from judge.pdf_problems import HAS_PDF, DefaultPdfMaker
 from judge.utils.diggpaginator import DiggPaginator
 from judge.utils.opengraph import generate_opengraph
 from judge.utils.problems import contest_completed_ids, user_completed_ids, contest_attempted_ids, user_attempted_ids, \
     hot_problems
 from judge.utils.strings import safe_int_or_none, safe_float_or_none
+from judge.utils.tickets import own_ticket_filter
 from judge.utils.views import TitleMixin, generic_message, QueryStringSortMixin
 
 
@@ -89,6 +90,10 @@ class SolvedProblemMixin(object):
     @cached_property
     def in_contest(self):
         return self.profile is not None and self.profile.current_contest is not None
+
+    @cached_property
+    def contest(self):
+        return self.request.user.profile.current_contest.contest
 
     @cached_property
     def profile(self):
@@ -170,12 +175,21 @@ class ProblemDetail(ProblemMixin, SolvedProblemMixin, CommentedDetailView):
             if contest_problem.max_submissions:
                 context['submissions_left'] = max(contest_problem.max_submissions - get_contest_submission_count(self.object.code, user.profile), 0)
 
+        context['available_judges'] = Judge.objects.filter(online=True, problems=self.object)
         context['show_languages'] = self.object.allowed_languages.count() != Language.objects.count()
         context['has_pdf_render'] = HAS_PDF
         context['completed_problem_ids'] = self.get_completed_problems()
         context['attempted_problems'] = self.get_attempted_problems()
-        context['num_open_tickets'] = self.object.tickets.filter(is_open=True).count()
-        context['can_edit_problem'] = self.object.is_editable_by(user)
+
+        can_edit = self.object.is_editable_by(user)
+        context['can_edit_problem'] = can_edit
+        if user.is_authenticated:
+            tickets = self.object.tickets
+            if not can_edit:
+                tickets = tickets.filter(own_ticket_filter(user.profile.id))
+            context['has_tickets'] = tickets.exists()
+            context['num_open_tickets'] = tickets.filter(is_open=True).count()
+
         try:
             context['editorial'] = Solution.objects.get(problem=self.object)
         except ObjectDoesNotExist:
@@ -233,14 +247,20 @@ class ProblemPdfView(ProblemMixin, SingleObjectMixin, View):
         if not os.path.exists(cache):
             self.logger.info('Rendering: %s.%s.pdf', problem.code, language)
             with DefaultPdfMaker() as maker, translation.override(language):
+                problem_name = problem.name if trans is None else trans.name
                 maker.html = get_template('problem/raw.html').render({
                     'problem': problem,
-                    'problem_name': problem.name if trans is None else trans.name,
+                    'problem_name': problem_name,
                     'description': problem.description if trans is None else trans.description,
-                    'url': request.build_absolute_uri()
-                }).replace('"//', '"http://').replace("'//", "'http://")
+                    'url': request.build_absolute_uri(),
+                    'math_engine': maker.math_engine,
+                }).replace('"//', '"https://').replace("'//", "'https://")
+                maker.title = problem_name
 
-                for file in ('style.css', 'pygment-github.css', 'mathjax_config.js'):
+                assets = ['style.css', 'pygment-github.css']
+                if maker.math_engine == 'jax':
+                    assets.append('mathjax_config.js')
+                for file in assets:
                     maker.load(file, os.path.join(settings.DMOJ_RESOURCES, file))
                 maker.make()
                 if not maker.success:
@@ -343,15 +363,15 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
     def get_normal_queryset(self):
         filter = Q(is_public=True)
         if self.profile is not None:
-            filter |= Q(
-                id__in=Problem.objects.annotate(contest_user_count=Count('contest__users'))
-                              .filter(contest__users=self.profile.current_contest_id,
-                                      contest_user_count__gt=0).values('id').distinct()
-            )
             filter |= Q(authors=self.profile)
             filter |= Q(curators=self.profile)
             filter |= Q(testers=self.profile)
         queryset = Problem.objects.filter(filter).select_related('group').defer('description')
+        if not self.request.user.has_perm('see_organization_problem'):
+            filter = Q(is_organization_private=False)
+            if self.profile is not None:
+                filter |= Q(organizations__id__in=self.profile.organizations.all())
+            queryset = queryset.filter(filter)
         if self.profile is not None and self.hide_solved:
             queryset = queryset.exclude(id__in=Submission.objects.filter(user=self.profile, points=F('problem__points'))
                                         .values_list('problem__id', flat=True))
@@ -406,6 +426,7 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
         else:
             context['hot_problems'] = None
             context['point_start'], context['point_end'], context['point_values'] = 0, 0, {}
+            context['hide_contest_scoreboard'] = self.contest.hide_scoreboard
         return context
 
     def get_noui_slider_points(self):
@@ -615,6 +636,9 @@ def problem_submit(request, problem=None, submission=None):
 @permission_required('judge.clone_problem')
 def clone_problem(request, problem):
     problem = get_object_or_404(Problem, code=problem)
+    if not problem.is_accessible_by(request.user):
+        raise Http404()
+
     languages = problem.allowed_languages.all()
     types = problem.types.all()
     problem.pk = None
