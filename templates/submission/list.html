@@ -211,13 +211,7 @@
     {% include "submission/search-form.html" %}
 
     <div id="common-content" class="ui vertical segment">
-        <!--
-        <div class="sidebox">
-            <div id="statistics-table">{% include "problem/statistics-table.html" %}</div>
-        </div>
-        -->
-
-        <div class="submission">
+        <div class="submission" style="width:100%;">
             <div id="ws-closed" style="display: none;"> 
                 <a href="javascript:void(0)" class="ui red message" style="display:block;">
                     {{ _('You were disconnected. Refresh to show latest updates.') }}
