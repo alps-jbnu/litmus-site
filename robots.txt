@@ -19,3 +19,4 @@ Disallow: /contest/*/join
 Disallow: /contest/*/leave
 Disallow: /contests/*/*/
 Disallow: /tickets/*
+Disallow: /notifications/*
