@@ -1710,7 +1710,7 @@ msgstr "내부 오류"
 
 #: judge/models/submission.py:24
 msgid "Short circuit"
-msgstr ""
+msgstr "틀리면 채점 중단"
 
 #: judge/models/submission.py:25 judge/models/submission.py:37
 #: judge/models/submission.py:55
@@ -1727,7 +1727,7 @@ msgstr "채점 중"
 
 #: judge/models/submission.py:33 judge/models/submission.py:53
 msgid "Grading"
-msgstr "점수 메기는 중"
+msgstr "점수 기록 중"
 
 #: judge/models/submission.py:34 judge/models/submission.py:54
 msgid "Completed"
@@ -1819,7 +1819,7 @@ msgstr ""
 
 #: judge/models/submission.py:163
 msgid "batch number"
-msgstr ""
+msgstr "배치 번호"
 
 #: judge/models/submission.py:164
 msgid "judging feedback"

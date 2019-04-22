@@ -109,7 +109,7 @@ class Problem(models.Model):
     group = models.ForeignKey(ProblemGroup, verbose_name=_('problem group'))
     time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_('The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'), default=1.0)
     memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'), default=131072)
-    short_circuit = models.BooleanField(default=False)
+    short_circuit = models.BooleanField(verbose_name=_('Short circuit'), default=False)
     points = models.FloatField(verbose_name=_('points'), default=10.0,
                                help_text=_('Problem points should be between 1.0 and 20.0'),
                                validators=[MinValueValidator(1.0), MaxValueValidator(20.0)])
