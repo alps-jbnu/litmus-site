@@ -28,10 +28,13 @@
                 }).fail(function (data) {
                     console.log('Failed to update testcases!');
                 });
-                /*
+
+                /*                
                 if ($(window).scrollTop() + $(window).height() > $(document).height() - 100)
                     $("html, body").animate({scrollTop: $(document).height()}, 0);
                 */
+                // scroll to bottom
+                $(document).scrollTop($(document).height());
             }
 
             var receiver = new EventReceiver(
@@ -81,6 +84,7 @@
               })
             ;
         });
+
         </script>
     {% else %}
         <script type="text/javascript">$(document).ready(function(){$('.status.progress').progress();})</script>
