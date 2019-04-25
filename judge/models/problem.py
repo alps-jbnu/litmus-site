@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import F, QuerySet
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
@@ -109,7 +110,7 @@ class Problem(models.Model):
     group = models.ForeignKey(ProblemGroup, verbose_name=_('problem group'))
     time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_('The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'), default=1.0)
     memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'), default=131072)
-    short_circuit = models.BooleanField(default=False)
+    short_circuit = models.BooleanField(verbose_name=_('Short circuit'), default=False)
     points = models.FloatField(verbose_name=_('points'), default=10.0,
                                help_text=_('Problem points should be between 1.0 and 20.0'),
                                validators=[MinValueValidator(1.0), MaxValueValidator(20.0)])
@@ -157,8 +158,14 @@ class Problem(models.Model):
         return self.is_editor(user.profile)
 
     def is_accessible_by(self, user):
+        from datetime import datetime 
+        now = timezone.localtime()
+
         # All users can see public problems
         if self.is_public:
+            # not visible until its date if it has date
+            if self.date is not None:
+                return self.date <= now
             return True
 
         # If the user can view all problems

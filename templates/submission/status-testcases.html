@@ -25,7 +25,9 @@
         {% if is_pretest %}
             <h3>{{ _('Pretest Execution Results') }}</h3>
         {% else %}
-            <h3>{{ _('Execution Results') }}</h3>
+            <h3>{{ _('Execution Results') }} <small><a href="javascript:void(0)" id="show-cases">자세히</a></small></h3>
+            <style>#test-cases .case-row.sc { display: none; }</style>
+            <script>$(document).ready(function(){$("#show-cases").click(function(){$("#test-cases .sc").toggle();});});</script>
         {% endif %}
         <br>
         {% set test_case_id = counter() %}
@@ -37,7 +39,7 @@
                 <div class="batch-cases">
             {% endif %}
         <table>{% for case in batch.cases %}
-            <tr id="{{ case.id }}" class="case-row toggle closed">
+            <tr id="{{ case.id }}" class="case-row toggle closed {% if case.status == 'SC' %} sc {% endif %}">
                 <td>
                     {%- if case.status != 'AC' and case.output -%}
                         <i class="fa fa-chevron-right fa-fw"></i>

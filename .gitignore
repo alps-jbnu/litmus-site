@@ -16,3 +16,4 @@ sass_processed
 media/
 node_modules/
 uwsgi
+static/cache/
