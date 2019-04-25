@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import F, QuerySet
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
@@ -157,8 +158,14 @@ class Problem(models.Model):
         return self.is_editor(user.profile)
 
     def is_accessible_by(self, user):
+        from datetime import datetime 
+        now = timezone.localtime()
+
         # All users can see public problems
         if self.is_public:
+            # not visible until its date if it has date
+            if self.date is not None:
+                return self.date <= now
             return True
 
         # If the user can view all problems
