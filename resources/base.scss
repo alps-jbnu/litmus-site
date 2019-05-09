@@ -1,6 +1,7 @@
 @charset "UTF-8";
 
 @import "vars";
+@import url("https://cdn.jsdelivr.net/gh/moonspam/NanumBarunGothic@1.0/nanumbarungothicsubset.css");
 
 @-ms-viewport {
     min-width: 480px;
@@ -112,7 +113,7 @@ body {
     font-size: $base_font_size;
     line-height: 1.231;
     background: $background_light_gray;
-    font-family: "Segoe UI", "Lucida Grande", Arial, sans-serif;
+    font-family: "NanumBarunGothic", "Segoe UI", "Lucida Grande", Arial, sans-serif;
     color: #000;
     height: 100%;
 }

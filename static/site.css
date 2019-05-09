@@ -1,2 +1,4 @@
 code, kbd, samp { font-family: consolas, ubuntu, tahoma, monospace; }
-
+h1, h2, h3, h4, h5, h6, p, a, nav, span, div, table, tr, td, th, ul, li {
+  font-family: NanumBarunGothic, MalgunGothic, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
