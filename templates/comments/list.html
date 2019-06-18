@@ -8,7 +8,7 @@
         {% set profile = request.user.profile if logged_in else None %}
         {% for node in mptt_tree(comment_list) recursive %}
             {% if not node.hidden or perms.judge.change_comment %}
-                <div class="comment" id="comment-{{ node.id }}" style="position: inherit">
+                <div class="comment {% if node.score < -2 %}censored{% endif %}" id="comment-{{ node.id }}" style="position: inherit">
                     {% with author=node.author, user=node.author.user %}
                         <a href="{{ url('user_page', user.username) }}" class="avatar">
                             <img src="{{ gravatar(author, 135) }}">
