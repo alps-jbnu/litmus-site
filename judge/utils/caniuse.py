@@ -1,10 +1,12 @@
 import json
 import urllib2
+import ssl
 from contextlib import closing
 
 from ua_parser import user_agent_parser
 
-with closing(urllib2.urlopen('https://raw.githubusercontent.com/Fyrd/caniuse/master/data.json')) as f:
+context = ssl._create_unverified_context()
+with closing(urllib2.urlopen('https://raw.githubusercontent.com/Fyrd/caniuse/master/data.json', context=context)) as f:
     _SUPPORT_DATA = json.load(f)['data']
 
 SUPPORT = 'y'
