@@ -4,7 +4,7 @@ certifi==2017.11.5
 chardet==3.0.4
 colorama==0.3.9
 Cython==0.27.3
-Django==1.11.20
+Django==1.11.29
 django-appconf==1.0.2
 django-compressor==2.2
 django-impersonate==1.3
